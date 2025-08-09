@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+
+# environment variables
+.env
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# runtime data
+pids/
+*.pid
+*.seed
+
+# directories for builds or temp files
+dist/
+build/
+
+# misc
+.DS_Store
