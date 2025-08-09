@@ -14,7 +14,7 @@ Developed using modern technologies, this backend is built to be scalable, secur
 ## Features
 
 - **User Authentication & Authorization**  
-  Secure login system with **JSON Web Tokens (JWT), supporting role-based access control for faculty and admin users.
+  Secure login system with JSON Web Tokens (JWT), supporting role-based access control for faculty and admin users.
 
 - **Faculty Appraisal Form Submission & Update**  
   Faculty members can submit and edit appraisal details including research publications, seminars, projects, and lectures.
@@ -33,7 +33,6 @@ Developed using modern technologies, this backend is built to be scalable, secur
 
 ---
 
-## Technology Stack
 
 ## Technology Stack
 
@@ -45,7 +44,7 @@ Developed using modern technologies, this backend is built to be scalable, secur
 - **JSON Web Tokens (JWT)** — Secure token-based authentication system.
 - **dotenv** — Loads environment variables from `.env` files for configuration management.
 - **Nodemon** — Tool to automatically restart the server during development on code changes.
-- **bcrypt** — Password hashing for secure storage of user credentials (if implementing user signup/login).
+- **bcrypt** — Password hashing for secure storage of user credentials.
 
 ### Frontend
 - **React.js** For building dynamic and responsive user interfaces.
@@ -64,6 +63,7 @@ Developed using modern technologies, this backend is built to be scalable, secur
 
    ```bash
    git clone https://github.com/aniketsharma889/faculty-appraisal-system.git
+   cd faculty-appraisal-system
    cd backend
    ```
 2. **Install Backend Dependencies**
