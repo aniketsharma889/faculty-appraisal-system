@@ -1,4 +1,4 @@
-# Faculty Appraisal System Backend
+# Faculty Appraisal System
 
 ## About This Project
 
@@ -14,10 +14,13 @@ Developed using modern technologies, this backend is built to be scalable, secur
 ## Features
 
 - **User Authentication & Authorization**  
-  Secure login system with **JSON Web Tokens (JWT), supporting role-based access control for faculty and admin users.
+  Secure login system with **JSON Web Tokens (JWT)**, supporting role-based access control for faculty, HOD, and admin users.
 
 - **Faculty Appraisal Form Submission & Update**  
   Faculty members can submit and edit appraisal details including research publications, seminars, projects, and lectures.
+
+- **HOD Department Management**  
+  HODs can view and review appraisals submitted by faculty members in their own department only.
 
 - **Admin Dashboard**  
   Admins can view all appraisal submissions, update their status, and add comments or feedback.
@@ -26,14 +29,13 @@ Developed using modern technologies, this backend is built to be scalable, secur
   Robust backend validations ensure all required data fields are properly formatted and complete.
 
 - **Role-Based Middleware**  
-  Middleware enforces secure access control restricting routes based on user roles.
+  Middleware enforces secure access control restricting routes based on user roles (faculty, HOD, admin).
 
 - **Scalable API Architecture**  
   Modular and maintainable codebase, ready for future features like notifications, reporting, or frontend integration.
 
 ---
 
-## Technology Stack
 
 ## Technology Stack
 
@@ -46,6 +48,7 @@ Developed using modern technologies, this backend is built to be scalable, secur
 - **dotenv** — Loads environment variables from `.env` files for configuration management.
 - **Nodemon** — Tool to automatically restart the server during development on code changes.
 - **bcrypt** — Password hashing for secure storage of user credentials (if implementing user signup/login).
+- **multer** — Middleware for handling multipart/form-data, primarily used for uploading files.
 
 ### Frontend
 - **React.js** For building dynamic and responsive user interfaces.
@@ -115,6 +118,7 @@ Developed using modern technologies, this backend is built to be scalable, secur
 - [bcrypt](https://github.com/kelektiv/node.bcrypt.js/)
 - [dotenv](https://github.com/motdotla/dotenv)
 - [nodemon](https://github.com/remy/nodemon#nodemon)
+- [multer](https://github.com/expressjs/multer)
 ### Frontend References
 - [React.js](https://reactjs.org/) 
 - [Vite](https://vitejs.dev/) 
