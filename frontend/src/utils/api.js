@@ -173,4 +173,35 @@ export const getHODAppraisalById = async (id) => {
   }
 };
 
+export const submitHODReview = async (formId, action, reviewComments) => {
+  try {
+    const response = await api.post('/hod/review', {
+      formId,
+      action,
+      reviewComments
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to submit review' };
+  }
+};
+
+export const getHODDashboardStats = async () => {
+  try {
+    const response = await api.get('/hod/dashboard-stats');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch dashboard statistics' };
+  }
+};
+
+export const getDepartmentFaculty = async () => {
+  try {
+    const response = await api.get('/hod/department-faculty');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch department faculty' };
+  }
+};
+
 export default api;

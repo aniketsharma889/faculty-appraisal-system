@@ -1,4 +1,5 @@
 const Appraisal = require('../models/appraisal-form-model');
+const mongoose = require('mongoose');
 
 const submitAppraisal = async (req, res) => {
   try {
@@ -348,4 +349,108 @@ const getHODAppraisalById = async (req, res) => {
   }
 };
 
-module.exports = { submitAppraisal, getAllAppraisals, updateStatus, getMyAppraisals, getAppraisalById, updateAppraisal, getAppraisalStats, getHODAppraisals, getHODAppraisalById };
+const reviewAppraisal = async (req, res) => {
+  try {
+    const hodId = req.user.userId;
+    const { formId, action, reviewComments } = req.body;
+
+    // Validate required fields
+    if (!formId || !action || !reviewComments) {
+      return res.status(400).json({ 
+        message: 'Form ID, action, and review comments are required' 
+      });
+    }
+
+    // Validate action
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ 
+        message: 'Action must be either "approve" or "reject"' 
+      });
+    }
+
+    // Validate formId format
+    if (!mongoose.Types.ObjectId.isValid(formId)) {
+      return res.status(400).json({ 
+        message: 'Invalid form ID format' 
+      });
+    }
+
+    // Get HOD's department
+    const User = require('../models/user-model');
+    const hod = await User.findById(hodId);
+    if (!hod) {
+      return res.status(404).json({ message: 'HOD not found' });
+    }
+
+    // Find the appraisal form
+    const appraisal = await Appraisal.findById(formId)
+      .populate('faculty', 'name email employeeCode department');
+
+    if (!appraisal) {
+      return res.status(404).json({ message: 'Appraisal form not found' });
+    }
+
+    // Verify appraisal belongs to HOD's department
+    if (appraisal.department !== hod.department) {
+      return res.status(403).json({ 
+        message: 'Access denied: Appraisal not in your department' 
+      });
+    }
+
+    // Check if appraisal is pending HOD review
+    if (appraisal.status !== 'pending_hod') {
+      return res.status(400).json({ 
+        message: `Cannot review: Appraisal status is "${appraisal.status}". Only "pending_hod" appraisals can be reviewed.`
+      });
+    }
+
+    // Update appraisal based on action
+    const approved = action === 'approve';
+    appraisal.hodApproval = {
+      approved: approved,
+      date: new Date(),
+      remarks: reviewComments
+    };
+    appraisal.status = approved ? 'pending_admin' : 'rejected';
+
+    // Save the updated appraisal
+    await appraisal.save();
+
+    // Prepare response message
+    const actionText = approved ? 'approved and forwarded to admin' : 'rejected';
+    const message = `Appraisal ${actionText} successfully`;
+
+    res.json({
+      success: true,
+      message: message,
+      appraisal: {
+        id: appraisal._id,
+        status: appraisal.status,
+        hodApproval: appraisal.hodApproval,
+        faculty: appraisal.faculty
+      }
+    });
+
+  } catch (error) {
+    console.error('Review appraisal error:', error);
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid form ID format' });
+    }
+    
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        message: 'Validation error', 
+        details: error.message 
+      });
+    }
+
+    res.status(500).json({ 
+      message: 'Server error while processing review', 
+      error: error.message 
+    });
+  }
+};
+
+module.exports = { submitAppraisal, getAllAppraisals, updateStatus, getMyAppraisals, getAppraisalById, updateAppraisal, getAppraisalStats, getHODAppraisals, getHODAppraisalById, reviewAppraisal };

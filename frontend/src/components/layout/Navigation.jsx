@@ -43,7 +43,7 @@ const Navigation = ({ user }) => {
       case 'hod':
         return [
           ...baseItems,
-          { name: 'Review Submissions', path: '/hod/review-submissions', icon: CheckSquare },
+          { name: 'View Appraisals', path: '/hod/view-appraisals', icon: CheckSquare },
           { name: 'Reports', path: '/hod/reports', icon: BarChart3 },
           { name: 'Profile', path: '/hod/profile', icon: UserCircle }
         ];

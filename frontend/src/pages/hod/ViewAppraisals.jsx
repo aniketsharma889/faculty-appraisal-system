@@ -1,19 +1,28 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FileText, Eye, Calendar, User, Building2, Clock } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import Button from "../../components/ui/Button";
 import { getHODAppraisals } from "../../utils/api";
+import { showSuccessToast } from "../../utils/toast";
 
 const ViewAppraisals = () => {
   const [appraisals, setAppraisals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchAppraisals();
-  }, []);
+
+    // Show success message if coming from review page
+    if (location.state?.message) {
+      showSuccessToast(location.state.message);
+      // Clear the state to prevent showing the message again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const fetchAppraisals = async () => {
     try {

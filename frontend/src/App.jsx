@@ -10,6 +10,7 @@ import HODDashboard from "./pages/hod/Dashboard";
 import HODViewAppraisals from "./pages/hod/ViewAppraisals";
 import HODReviewAppraisal from "./pages/hod/ReviewAppraisal";
 import AdminDashboard from "./pages/admin/Dashboard";
+import ManageFaculty from "./pages/hod/ManageFaculty";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/hod/view-appraisals" element={<HODViewAppraisals />} />
         <Route path="/hod/appraisal/:id" element={<HODReviewAppraisal />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/hod/manage-faculty" element={<ManageFaculty />} />
       </Routes>
     </BrowserRouter>
   )

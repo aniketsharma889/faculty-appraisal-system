@@ -15,7 +15,6 @@ Developed using modern technologies, this backend is built to be scalable, secur
 
 - **User Authentication & Authorization**  
   Secure login system with **JSON Web Tokens (JWT)**, supporting role-based access control for faculty, HOD, and admin users.
-  Secure login system with JSON Web Tokens (JWT), supporting role-based access control for faculty and admin users.
 
 - **Faculty Appraisal Form Submission & Update**  
   Faculty members can submit and edit appraisal details including research publications, seminars, projects, and lectures.
@@ -46,13 +45,10 @@ Developed using modern technologies, this backend is built to be scalable, secur
 - **MongoDB** — NoSQL document database for flexible and scalable data storage.
 - **Mongoose** — Elegant MongoDB object modeling for Node.js to define schemas and interact with the database.
 - **JSON Web Tokens (JWT)** — Secure token-based authentication system.
-- **dotenv** — Loads environment variables from `.env` files for configuration management.
-- **Nodemon** — Tool to automatically restart the server during development on code changes.
-
-- **bcrypt** — Password hashing for secure storage of user credentials (if implementing user signup/login).
-- **multer** — Middleware for handling multipart/form-data, primarily used for uploading files.
-
 - **bcrypt** — Password hashing for secure storage of user credentials.
+- **dotenv** — Loads environment variables from `.env` files for configuration management.
+- **multer** — Middleware for handling multipart/form-data, primarily used for uploading files.
+- **Nodemon** — Tool to automatically restart the server during development on code changes.
 
 ### Frontend
 - **React.js** For building dynamic and responsive user interfaces.
