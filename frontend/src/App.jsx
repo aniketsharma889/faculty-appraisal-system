@@ -11,6 +11,16 @@ import HODViewAppraisals from "./pages/hod/ViewAppraisals";
 import HODReviewAppraisal from "./pages/hod/ReviewAppraisal";
 import AdminDashboard from "./pages/admin/Dashboard";
 import ManageFaculty from "./pages/hod/ManageFaculty";
+import AdminViewAppraisals from "./pages/admin/ViewAppraisals";
+import AdminReviewAppraisal from "./pages/admin/ReviewAppraisal";
+import ManageUsers from "./pages/admin/ManageUsers";
+import ViewUser from "./pages/admin/ViewUser";
+import EditUser from "./pages/admin/EditUser";
+import Departments from "./pages/admin/Departments";
+import HODProfile from "./pages/hod/Profile";
+import HODEditProfile from "./pages/hod/EditProfile";
+import AdminProfile from "./pages/admin/Profile";
+import AdminEditProfile from "./pages/admin/EditProfile";
 
 function App() {
   return (
@@ -28,9 +38,19 @@ function App() {
         <Route path="/hod/appraisal/:id" element={<HODReviewAppraisal />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/hod/manage-faculty" element={<ManageFaculty />} />
+        <Route path="/admin/view-appraisals" element={<AdminViewAppraisals />} />
+        <Route path="/admin/appraisal/:id" element={<AdminReviewAppraisal />} />
+        <Route path="/admin/manage-users" element={<ManageUsers />} />
+        <Route path="/admin/user/:id" element={<ViewUser />} />
+        <Route path="/admin/departments" element={<Departments />} />
+        <Route path="/admin/edit-user/:id" element={<EditUser />} />
+        <Route path="/hod/profile" element={<HODProfile />} />
+        <Route path="/hod/edit-profile/:id" element={<HODEditProfile />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
+        <Route path="/admin/edit-profile/:id" element={<AdminEditProfile />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -204,4 +204,85 @@ export const getDepartmentFaculty = async () => {
   }
 };
 
+// Admin API functions
+export const getAllAppraisalsForAdmin = async () => {
+  try {
+    const response = await api.get('/admin/appraisals');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch appraisals' };
+  }
+};
+
+export const getAppraisalByIdForAdmin = async (id) => {
+  try {
+    const response = await api.get(`/admin/appraisals/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch appraisal details' };
+  }
+};
+
+export const submitAdminReview = async (formId, action, reviewComments) => {
+  try {
+    const response = await api.post('/admin/review', {
+      formId,
+      action,
+      reviewComments
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to submit review' };
+  }
+};
+
+// NEW: Admin dashboard and user management functions
+export const getAdminDashboardStats = async () => {
+  try {
+    const response = await api.get('/admin/dashboard-stats');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch dashboard statistics' };
+  }
+};
+
+export const getAllUsers = async () => {
+  try {
+    const response = await api.get('/admin/users');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch users' };
+  }
+};
+
+export const getUserById = async (userId) => {
+  try {
+    const response = await api.get(`/admin/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch user details' };
+  }
+};
+
+// Admin user management functions
+export const updateUserAsAdmin = async (userId, userData) => {
+  const response = await api.put(`/admin/users/${userId}`, userData);
+  return response.data;
+};
+
+export const promoteUser = async (userId, roleData) => {
+  const response = await api.put(`/admin/users/${userId}/role`, roleData);
+  return response.data;
+};
+
+// NEW: Admin departments function
+export const getDepartments = async () => {
+  try {
+    const response = await api.get('/admin/departments');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch departments' };
+  }
+};
+
 export default api;

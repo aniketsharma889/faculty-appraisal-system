@@ -7,6 +7,7 @@ const connectDb = require('./config/db');
 const userRouter = require('./routes/user-routes');
 const appraisalFormRouter = require('./routes/appraisal-form-routes');
 const hodRouter = require('./routes/hod-routes');
+const adminRoutes = require('./routes/admin-routes');
 
 const app = express();
 app.use(cors());
@@ -19,6 +20,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/users', userRouter);
 app.use('/api/appraisal-form', appraisalFormRouter);
 app.use('/api/hod', hodRouter);
+app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 

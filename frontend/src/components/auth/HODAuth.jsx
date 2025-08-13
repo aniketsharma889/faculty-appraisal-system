@@ -112,18 +112,43 @@ const HODAuth = () => {
               <div>
                 <Field name="department">
                   {({ field }) => (
-                    <select
-                      {...field}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="">Select Department</option>
-                      {departments.map(dept => (
-                        <option key={dept} value={dept}>{dept}</option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        {...field}
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm appearance-none cursor-pointer hover:border-gray-400"
+                      >
+                        <option value="" className="text-gray-500 text-xs">
+                          🏢 Select Department
+                        </option>
+                        <optgroup label="🔬 Engineering & Technology">
+                          <option value="Computer Science">💻 Computer Science</option>
+                          <option value="Electronics & Communication">📡 Electronics & Communication</option>
+                          <option value="Mechanical Engineering">⚙️ Mechanical Engineering</option>
+                          <option value="Civil Engineering">🏗️ Civil Engineering</option>
+                          <option value="Electrical Engineering">⚡ Electrical Engineering</option>
+                          <option value="Information Technology">🌐 Information Technology</option>
+                          <option value="Chemical Engineering">🧪 Chemical Engineering</option>
+                          <option value="Biotechnology">🧬 Biotechnology</option>
+                        </optgroup>
+                        <optgroup label="📚 Sciences & Liberal Arts">
+                          <option value="Mathematics">🔢 Mathematics</option>
+                          <option value="Physics">⚛️ Physics</option>
+                          <option value="Chemistry">🧪 Chemistry</option>
+                          <option value="English">📖 English</option>
+                        </optgroup>
+                        <optgroup label="💼 Management & Business">
+                          <option value="Management Studies">📊 Management Studies</option>
+                        </optgroup>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   )}
                 </Field>
-                <ErrorMessage name="department" component="div" className="text-red-500 text-sm" />
+                <ErrorMessage name="department" component="div" className="text-red-500 text-sm mt-1" />
               </div>
             </>
           )}

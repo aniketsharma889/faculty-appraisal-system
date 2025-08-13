@@ -106,12 +106,6 @@ const HODDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending_hod':
@@ -312,17 +306,7 @@ const HODDashboard = () => {
                       </div>
                     </div>
                   </Link>
-                  <div className="group bg-white border-2 border-slate-200 hover:border-green-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md cursor-pointer">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-slate-100 group-hover:bg-green-100 rounded-lg flex items-center justify-center mr-4 transition-colors">
-                        <BarChart3 className="w-5 h-5 text-slate-600 group-hover:text-green-600" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-800">Generate Reports</div>
-                        <div className="text-slate-500 text-sm">Department analytics</div>
-                      </div>
-                    </div>
-                  </div>
+                  
                   <Link to="/hod/manage-faculty" className="block">
                     <div className="group bg-white border-2 border-slate-200 hover:border-green-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md">
                       <div className="flex items-center">
@@ -335,6 +319,19 @@ const HODDashboard = () => {
                         </div>
                       </div>
                     </div>
+                  </Link>
+                  <Link to="/hod/profile" className="block">
+                  <div className="group bg-white border-2 border-slate-200 hover:border-green-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md cursor-pointer">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-slate-100 group-hover:bg-green-100 rounded-lg flex items-center justify-center mr-4 transition-colors">
+                        <BarChart3 className="w-5 h-5 text-slate-600 group-hover:text-green-600" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-slate-800">Profile</div>
+                        <div className="text-slate-500 text-sm">View-Profile</div>
+                      </div>
+                    </div>
+                  </div>
                   </Link>
                 </div>
               </div>

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Phone, Calendar, Award, BookOpen, GraduationCap, Users, Briefcase, FileText, Star, Building, MapPin, Clock, CheckCircle, XCircle, MessageSquare, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Calendar, Award, BookOpen, GraduationCap, Users, Briefcase, FileText, Star, Building, MapPin, Clock, CheckCircle, XCircle, MessageSquare, Download, Loader2, Shield } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import Button from "../../components/ui/Button";
-import { getHODAppraisalById, submitHODReview } from "../../utils/api";
+import { getAppraisalByIdForAdmin, submitAdminReview } from "../../utils/api";
 import { showSuccessToast, showErrorToast } from "../../utils/toast";
 
 const ReviewAppraisal = () => {
@@ -12,10 +12,10 @@ const ReviewAppraisal = () => {
   const [appraisal, setAppraisal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-   const [remarks, setRemarks] = useState("");
-   const [submitting, setSubmitting] = useState(false);
-   const [showConfirmModal, setShowConfirmModal] = useState(false);
-   const [pendingAction, setPendingAction] = useState(null);
+  const [remarks, setRemarks] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   useEffect(() => {
     fetchAppraisal();
@@ -25,7 +25,7 @@ const ReviewAppraisal = () => {
 
   const fetchAppraisal = async () => {
     try {
-      const data = await getHODAppraisalById(id);
+      const data = await getAppraisalByIdForAdmin(id);
       setAppraisal(data);
     } catch (err) {
       setError(err.message || "Failed to fetch appraisal details");
@@ -57,8 +57,8 @@ const ReviewAppraisal = () => {
   const InfoCard = ({ icon: Icon, title, children, className = "" }) => (
     <div className={`bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow ${className}`}>
       <div className="flex items-center mb-4">
-        <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
-          <Icon className="w-5 h-5 text-blue-600" />
+        <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center mr-3">
+          <Icon className="w-5 h-5 text-red-600" />
         </div>
         <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
       </div>
@@ -80,13 +80,13 @@ const ReviewAppraisal = () => {
     <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <div className="sm:flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mr-3">
             <Icon className="w-5 h-5 text-white" />
           </div>
           <h3 className="sm:text-base font-semibold text-gray-800">{title}</h3>
         </div>
         {count && (
-          <span className=" mt-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className=" mt-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
             {count} {count === 1 ? 'item' : 'items'}
           </span>
         )}
@@ -114,8 +114,8 @@ const ReviewAppraisal = () => {
         
         <p className="text-gray-600 mb-6">
           {action === 'approve' 
-            ? 'This appraisal will be forwarded to the admin for final approval.' 
-            : 'This appraisal will be returned to the faculty for revision.'
+            ? 'This appraisal will be marked as approved and finalized.' 
+            : 'This appraisal will be rejected and returned to the faculty.'
           }
         </p>
         
@@ -157,18 +157,16 @@ const ReviewAppraisal = () => {
     
     try {
       setSubmitting(true);
-      await submitHODReview(id, pendingAction, remarks);
+      await submitAdminReview(id, pendingAction, remarks);
       
-      // Show success message
       const successMessage = pendingAction === 'approve' 
-        ? 'Appraisal approved and forwarded to admin successfully!' 
-        : 'Appraisal rejected and returned to faculty successfully!';
+        ? 'Appraisal approved successfully!' 
+        : 'Appraisal rejected successfully!';
       
       showSuccessToast(successMessage);
       
-      // Small delay for user to see the toast, then navigate
       setTimeout(() => {
-        navigate("/hod/view-appraisals");
+        navigate("/admin/view-appraisals");
       }, 1500);
     } catch (err) {
       showErrorToast(err.message || `Failed to ${pendingAction} appraisal`);
@@ -185,11 +183,11 @@ const ReviewAppraisal = () => {
 
   if (loading) {
     return (
-      <DashboardLayout allowedRole="hod">
+      <DashboardLayout allowedRole="admin">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="min-h-screen flex items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Loading appraisal details...</p>
             </div>
           </div>
@@ -200,7 +198,7 @@ const ReviewAppraisal = () => {
 
   if (error) {
     return (
-      <DashboardLayout allowedRole="hod">
+      <DashboardLayout allowedRole="admin">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -208,7 +206,7 @@ const ReviewAppraisal = () => {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Appraisal</h3>
             <p className="text-gray-600 mb-6">{error}</p>
-            <Button onClick={() => navigate("/hod/view-appraisals")} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => navigate("/admin/view-appraisals")} className="bg-red-600 hover:bg-red-700">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Appraisals
             </Button>
@@ -219,7 +217,7 @@ const ReviewAppraisal = () => {
   }
 
   return (
-    <DashboardLayout allowedRole="hod">
+    <DashboardLayout allowedRole="admin">
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
           {/* Header */}
@@ -228,15 +226,18 @@ const ReviewAppraisal = () => {
               <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center">
                 <Button
                   variant="secondary"
-                  onClick={() => navigate("/hod/view-appraisals")}
+                  onClick={() => navigate("/admin/view-appraisals")}
                   className="w-fit sm:mr-4"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
                 <div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Faculty Appraisal Review</h1>
-                  <p className="text-sm sm:text-base text-gray-600 mt-1">Detailed review of faculty performance</p>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center">
+                    <Shield className="w-6 h-6 sm:w-8 sm:h-8 mr-2 text-red-500" />
+                    Admin Appraisal Review
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600 mt-1">Final review and approval of faculty performance</p>
                 </div>
               </div>
               <div className="flex items-center">
@@ -252,6 +253,7 @@ const ReviewAppraisal = () => {
             </div>
           </div>
 
+          {/* Same content structure as HOD review but with admin styling */}
           {/* Faculty Basic Information */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
             <InfoCard icon={User} title="Personal Information" className="xl:col-span-2">
@@ -303,7 +305,7 @@ const ReviewAppraisal = () => {
                     <div key={index} className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
                       <h4 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">{qual.degree}</h4>
                       <p className="text-gray-700 text-xs sm:text-sm mb-1">{qual.institution}</p>
-                      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-100 text-red-800">
                         {qual.yearOfPassing}
                       </span>
                     </div>
@@ -384,6 +386,7 @@ const ReviewAppraisal = () => {
                 </div>
               </SectionCard>
             )}
+
             {/* Seminars & Workshops */}
             {appraisal.seminars?.length > 0 && (
               <SectionCard 
@@ -461,9 +464,9 @@ const ReviewAppraisal = () => {
                 >
                   <div className="space-y-2 sm:space-y-3">
                     {appraisal.coursesTaught.map((course, index) => (
-                      <div key={index} className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <h4 className="font-semibold text-blue-900 text-sm sm:text-base">{course.courseName}</h4>
-                        <p className="text-blue-700 text-xs sm:text-sm">Semester: {course.semester}</p>
+                      <div key={index} className="bg-red-50 rounded-lg p-3 border border-red-200">
+                        <h4 className="font-semibold text-red-900 text-sm sm:text-base">{course.courseName}</h4>
+                        <p className="text-red-700 text-xs sm:text-sm">Semester: {course.semester}</p>
                       </div>
                     ))}
                   </div>
@@ -489,7 +492,7 @@ const ReviewAppraisal = () => {
               )}
             </div>
 
-{/* Student Mentoring */}
+            {/* Student Mentoring */}
             {appraisal.studentMentoring?.length > 0 && (
               <SectionCard 
                 icon={Users} 
@@ -521,13 +524,13 @@ const ReviewAppraisal = () => {
                   {appraisal.uploadedFiles.map((file, index) => (
                     <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between mb-3">
-                        <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 flex-shrink-0" />
+                        <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 flex-shrink-0" />
                         {file.fileUrl && (
                           <a
                             href={`${backendUrl}${file.fileUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-2 sm:px-3 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors ml-2"
+                            className="inline-flex items-center px-2 sm:px-3 py-1 rounded-md text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 transition-colors ml-2"
                           >
                             <Download className="w-3 h-3 mr-1" />
                             View
@@ -568,16 +571,16 @@ const ReviewAppraisal = () => {
                   )}
 
                   {appraisal.adminApproval?.remarks && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
                       <div className="flex items-start">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2 sm:mr-3 mt-1 flex-shrink-0">
-                          <User className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-red-100 rounded-full flex items-center justify-center mr-2 sm:mr-3 mt-1 flex-shrink-0">
+                          <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-red-600" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">Admin Review</h4>
-                          <p className="text-blue-800 mb-2 text-xs sm:text-sm">{appraisal.adminApproval.remarks}</p>
+                          <h4 className="font-semibold text-red-900 mb-2 text-sm sm:text-base">Previous Admin Review</h4>
+                          <p className="text-red-800 mb-2 text-xs sm:text-sm">{appraisal.adminApproval.remarks}</p>
                           {appraisal.adminApproval.date && (
-                            <p className="text-xs text-blue-700">
+                            <p className="text-xs text-red-700">
                               Reviewed on: {new Date(appraisal.adminApproval.date).toLocaleDateString()}
                             </p>
                           )}
@@ -589,12 +592,12 @@ const ReviewAppraisal = () => {
               </SectionCard>
             )}
 
-            {/* HOD Review Actions */}
-            {appraisal.status === 'pending_hod' && (
+            {/* Admin Review Actions */}
+            {appraisal.status === 'pending_admin' && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6 flex items-center">
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  HOD Review & Decision
+                  <Shield className="w-5 h-5 mr-2 text-red-500" />
+                  Admin Final Review & Decision
                 </h3>
 
                 <div className="space-y-4 sm:space-y-6">
@@ -604,14 +607,14 @@ const ReviewAppraisal = () => {
                     </label>
                     <textarea
                       rows={4}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:bg-gray-50"
                       placeholder="Enter your review comments..."
                       value={remarks}
                       onChange={(e) => setRemarks(e.target.value)}
                       disabled={submitting}
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Provide clear feedback about the appraisal quality and any required improvements.
+                      Provide final comments about the appraisal approval or rejection.
                     </p>
                   </div>
 
@@ -629,7 +632,7 @@ const ReviewAppraisal = () => {
                       ) : (
                         <>
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          <span className="hidden sm:inline">Approve & Forward to Admin</span>
+                          <span className="hidden sm:inline">Final Approval</span>
                           <span className="sm:hidden">Approve</span>
                         </>
                       )}
@@ -648,7 +651,7 @@ const ReviewAppraisal = () => {
                       ) : (
                         <>
                           <XCircle className="w-4 h-4 mr-2" />
-                          <span className="hidden sm:inline">Reject & Return to Faculty</span>
+                          <span className="hidden sm:inline">Final Rejection</span>
                           <span className="sm:hidden">Reject</span>
                         </>
                       )}
@@ -658,26 +661,26 @@ const ReviewAppraisal = () => {
               </div>
             )}
 
-        {/* Confirmation Modal */}
-        {showConfirmModal && (
-          <ConfirmationModal
-            action={pendingAction}
-            onConfirm={confirmReview}
-            onCancel={cancelReview}
-          />
-        )}
+            {/* Confirmation Modal */}
+            {showConfirmModal && (
+              <ConfirmationModal
+                action={pendingAction}
+                onConfirm={confirmReview}
+                onCancel={cancelReview}
+              />
+            )}
 
-        {/* Processing Overlay */}
-        {submitting && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-40 p-4">
-            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 flex items-center space-x-3 max-w-sm w-full">
-              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-blue-600 flex-shrink-0" />
-              <span className="text-gray-700 font-medium text-sm sm:text-base">
-                {pendingAction === 'approve' ? 'Approving appraisal...' : 'Rejecting appraisal...'}
-              </span>
-            </div>
-          </div>
-        )}
+            {/* Processing Overlay */}
+            {submitting && (
+              <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-40 p-4">
+                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 flex items-center space-x-3 max-w-sm w-full">
+                  <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-red-600 flex-shrink-0" />
+                  <span className="text-gray-700 font-medium text-sm sm:text-base">
+                    {pendingAction === 'approve' ? 'Approving appraisal...' : 'Rejecting appraisal...'}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -122,22 +122,24 @@ const updateProfile = async (req, res) => {
     const userId = req.user.userId;
     const requestedUserId = req.params.id;
 
-    // Security check: users can only update their own profile
-    if (userId !== requestedUserId) {
+    // Security check: users can only update their own profile, unless they're admin
+    if (userId !== requestedUserId && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'You can only update your own profile' });
     }
 
     // Check if email is already taken by another user
     if (email) {
-      const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+      const targetUserId = req.user.role === 'admin' ? requestedUserId : userId;
+      const existingUser = await User.findOne({ email, _id: { $ne: targetUserId } });
       if (existingUser) {
         return res.status(400).json({ message: 'Email already exists' });
       }
     }
 
     // Update user profile
+    const targetUserId = req.user.role === 'admin' ? requestedUserId : userId;
     const updatedUser = await User.findByIdAndUpdate(
-      userId,
+      targetUserId,
       {
         ...(name && { name }),
         ...(email && { email }),

@@ -79,3 +79,25 @@
     min-width: 280px;
   }
 }
+
+/* Progress utilities remain generic */
+.progress {
+  @apply w-full h-2 rounded-full bg-gray-200 overflow-hidden;
+}
+
+.progress-bar {
+  @apply h-full bg-gradient-to-r from-emerald-500 to-green-600 transition-all duration-700;
+}
+
+.card-fade-in {
+  animation: cardIn .4s ease;
+}
+@keyframes cardIn {
+  from { transform: translateY(6px); opacity:0; }
+  to { transform: translateY(0); opacity:1; }
+}
+
+/* Utility for backdrop blur on sticky elements */
+.backdrop-blur {
+  backdrop-filter: blur(8px);
+}
