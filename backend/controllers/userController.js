@@ -12,6 +12,13 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Prevent admin registration through this endpoint
+    if (role === 'admin') {
+      return res.status(400).json({
+        message: 'Admin registration is not allowed through this endpoint.',
+      });
+    }
+
     // Validate required fields based on role
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -40,6 +47,8 @@ const register = async (req, res) => {
     if (role === 'faculty' || role === 'hod') {
       userData.employeeCode = employeeCode;
       userData.department = department;
+    } else {
+      userData.employeeCode = undefined; // make sure it's not null
     }
 
     const user = new User(userData);

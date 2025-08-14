@@ -4,49 +4,32 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import InputField from "../ui/ImputField";
-import { loginUser, registerUser } from "../../utils/api";
+import { loginUser } from "../../utils/api";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string().min(6, "Too short!").required("Password is required"),
 });
 
-const RegisterSchema = Yup.object().shape({
-  name: Yup.string().required("Name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().min(6, "Too short!").required("Password is required"),
-});
-
 const AdminAuth = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     setIsLoading(true);
     setApiError("");
-    setSuccessMessage("");
 
     try {
-      let response;
-      if (isLogin) {
-        response = await loginUser(values);
-        if (response.user.role !== 'admin') {
-          throw new Error('Invalid credentials for admin login');
-        }
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response.user));
-        navigate("/admin/dashboard");
-      } else {
-        await registerUser({ ...values, role: 'admin' });
-        setSuccessMessage("Admin registration successful! Please login.");
-        setIsLogin(true);
-        resetForm();
+      const response = await loginUser(values);
+      if (response.user.role !== 'admin') {
+        throw new Error('Invalid credentials for admin login');
       }
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+      navigate("/admin/dashboard");
     } catch (error) {
-      setApiError(error.message || `${isLogin ? 'Login' : 'Registration'} failed`);
+      setApiError(error.message || "Admin login failed");
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -55,36 +38,17 @@ const AdminAuth = () => {
 
   return (
     <Formik
-      initialValues={isLogin ? 
-        { email: "", password: "" } : 
-        { name: "", email: "", password: "" }
-      }
-      validationSchema={isLogin ? LoginSchema : RegisterSchema}
+      initialValues={{ email: "", password: "" }}
+      validationSchema={LoginSchema}
       onSubmit={handleSubmit}
-      enableReinitialize
     >
       {() => (
         <Form className="space-y-4">
-          <h2 className="text-2xl font-bold text-center mb-6">
-            Admin {isLogin ? 'Login' : 'Registration'}
-          </h2>
+          <h2 className="text-2xl font-bold text-center mb-6">Admin Login</h2>
 
           {apiError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
               {apiError}
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-              {successMessage}
-            </div>
-          )}
-
-          {!isLogin && (
-            <div>
-              <Field name="name" placeholder="Full Name" as={InputField} />
-              <ErrorMessage name="name" component="div" className="text-red-500 text-sm" />
             </div>
           )}
 
@@ -99,25 +63,8 @@ const AdminAuth = () => {
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 
-              (isLogin ? "Logging in..." : "Registering...") : 
-              (isLogin ? "Login as Admin" : "Register as Admin")
-            }
+            {isLoading ? "Logging in..." : "Login as Admin"}
           </Button>
-
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setApiError("");
-                setSuccessMessage("");
-              }}
-              className="text-blue-500 hover:text-blue-700 text-sm"
-            >
-              {isLogin ? "Need to register? Click here" : "Already have an account? Login"}
-            </button>
-          </div>
         </Form>
       )}
     </Formik>
@@ -125,3 +72,4 @@ const AdminAuth = () => {
 };
 
 export default AdminAuth;
+            

@@ -27,5 +27,4 @@ const hodOnly = (req, res, next) => {
   }
   next();
 };
-
-module.exports = { auth, adminOnly, hodOnly };
+module.exports = { auth, adminOnly, hodOnly};
