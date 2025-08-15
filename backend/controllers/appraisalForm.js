@@ -1,6 +1,22 @@
 const Appraisal = require('../models/appraisal-form-model');
 const mongoose = require('mongoose');
 
+   const cloudinary = require('../config/cloudinaryConfig'); 
+   const streamifier = require('streamifier');
+
+async function uploadToCloudinary(file) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: 'auto', folder: 'faculty-appraisals' },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    streamifier.createReadStream(file.buffer).pipe(stream);
+  });
+}
+
 const submitAppraisal = async (req, res) => {
   try {
     const facultyId = req.user.userId;
@@ -43,14 +59,22 @@ const submitAppraisal = async (req, res) => {
     }
 
     // Add new uploaded files
-    if (req.files && req.files.length > 0) {
-      const newFiles = req.files.map(file => ({
+
+if (req.files && req.files.length > 0) {
+  const newUploads = await Promise.all(
+    req.files.map(async (file) => {
+      const result = await uploadToCloudinary(file);
+      return {
         fileName: file.originalname,
-        fileUrl: `/uploads/${file.filename}`,
+        fileUrl: result.secure_url,
         uploadedAt: new Date()
-      }));
-      processedFiles = [...processedFiles, ...newFiles];
-    }
+      };
+    })
+  );
+  processedFiles = [...processedFiles, ...newUploads];
+}
+
+
 
     const appraisal = new Appraisal({
       faculty: facultyId,
@@ -227,14 +251,19 @@ const updateAppraisal = async (req, res) => {
       }
     }
 
-    // Add new uploaded files
+    // Add new uploaded files using Cloudinary
     if (req.files && req.files.length > 0) {
-      const newFiles = req.files.map(file => ({
-        fileName: file.originalname,
-        fileUrl: `/uploads/${file.filename}`,
-        uploadedAt: new Date()
-      }));
-      processedFiles = [...processedFiles, ...newFiles];
+      const newUploads = await Promise.all(
+        req.files.map(async (file) => {
+          const result = await uploadToCloudinary(file);
+          return {
+            fileName: file.originalname,
+            fileUrl: result.secure_url,
+            uploadedAt: new Date()
+          };
+        })
+      );
+      processedFiles = [...processedFiles, ...newUploads];
     }
 
     // Update all fields

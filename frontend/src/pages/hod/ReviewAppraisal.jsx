@@ -12,16 +12,14 @@ const ReviewAppraisal = () => {
   const [appraisal, setAppraisal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-   const [remarks, setRemarks] = useState("");
-   const [submitting, setSubmitting] = useState(false);
-   const [showConfirmModal, setShowConfirmModal] = useState(false);
-   const [pendingAction, setPendingAction] = useState(null);
+  const [remarks, setRemarks] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   useEffect(() => {
     fetchAppraisal();
   }, [id]);
-
-  const backendUrl = 'http://localhost:5000';
 
   const fetchAppraisal = async () => {
     try {
@@ -524,7 +522,7 @@ const ReviewAppraisal = () => {
                         <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 flex-shrink-0" />
                         {file.fileUrl && (
                           <a
-                            href={`${backendUrl}${file.fileUrl}`}
+                            href={file.fileUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-2 sm:px-3 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors ml-2"

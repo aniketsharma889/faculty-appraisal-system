@@ -45,7 +45,7 @@ const FileUploadSection = ({ formikProps }) => {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
         <h3 className="font-medium text-blue-800 mb-2 text-sm sm:text-base">Upload Guidelines:</h3>
         <ul className="text-xs sm:text-sm text-blue-700 space-y-1">
-          <li>• Supported formats: PDF, DOC, DOCX, JPG, PNG</li>
+          <li>• Supported formats: PDF, JPG, PNG</li>
           <li>• Maximum file size: 10MB per file</li>
           <li>• Please ensure all documents are clear and legible</li>
           <li>• Upload documents in the order of relevance</li>

@@ -21,8 +21,6 @@ const ReviewAppraisal = () => {
     fetchAppraisal();
   }, [id]);
 
-  const backendUrl = 'http://localhost:5000';
-
   const fetchAppraisal = async () => {
     try {
       const data = await getAppraisalByIdForAdmin(id);
@@ -527,7 +525,7 @@ const ReviewAppraisal = () => {
                         <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 flex-shrink-0" />
                         {file.fileUrl && (
                           <a
-                            href={`${backendUrl}${file.fileUrl}`}
+                            href={file.fileUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-2 sm:px-3 py-1 rounded-md text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 transition-colors ml-2"
