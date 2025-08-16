@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   BarChart3, 
   Calendar, 
@@ -44,6 +45,7 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const [appraisals, setAppraisals] = useState([]);
   const [faculty, setFaculty] = useState([]);
   const [stats, setStats] = useState({
@@ -67,6 +69,20 @@ const Reports = () => {
       setSubmissionTrends(trends);
     }
   }, [selectedTimeframe, appraisals]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (exportDropdownOpen && !event.target.closest('.export-dropdown-container')) {
+        setExportDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [exportDropdownOpen]);
 
   const fetchReportsData = async () => {
     try {
@@ -191,6 +207,11 @@ const Reports = () => {
     setRefreshing(true);
     await fetchReportsData();
     setTimeout(() => setRefreshing(false), 600);
+  };
+
+  const handleExportClick = (exportFunction) => {
+    exportFunction();
+    setExportDropdownOpen(false);
   };
 
   const exportToPDF = async () => {
@@ -607,61 +628,84 @@ const Reports = () => {
   return (
     <DashboardLayout allowedRole="hod">
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           
-          {/* Header */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="mb-4 lg:mb-0">
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                  <BarChart3 className="w-8 h-8 mr-3 text-green-600" />
+          {/* Header - Responsive */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+            <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
+              <div className="text-center lg:text-left">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-start">
+                  <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 text-green-600" />
                   Department Reports
                 </h1>
-                <p className="text-gray-600 mt-2">
+                <p className="text-gray-600 mt-2 text-sm sm:text-base">
                   Analytics and insights for department appraisal submissions
                 </p>
               </div>
               
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3">
                 <Button
                   onClick={handleRefresh}
                   disabled={refreshing}
                   variant="outline"
-                  className="border-green-200 text-green-600 hover:bg-green-50"
+                  className="border-green-200 text-green-600 hover:bg-green-50 w-full sm:w-auto"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
                 
-                {/* Export Dropdown */}
-                <div className="relative group">
+                {/* Export Dropdown - Mobile Friendly */}
+                <div className="relative export-dropdown-container">
                   <Button
+                    onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
                     variant="secondary"
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Export Report
+                    <span className="hidden sm:inline">Export Report</span>
+                    <span className="sm:hidden">Export</span>
                   </Button>
                   
-                  {/* Dropdown Menu */}
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                    <div className="py-1">
-                      <button
-                        onClick={exportToPDF}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        <FileDown className="w-4 h-4 mr-3" />
-                        Export as PDF
-                      </button>
-                      <button
-                        onClick={exportToCSV}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        <Table className="w-4 h-4 mr-3" />
-                        Export as CSV
-                      </button>
+                  {/* Dropdown Menu - Click Based */}
+                  {exportDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 animate-in slide-in-from-top-2 duration-200">
+                      <div className="py-2">
+                        <button
+                          onClick={() => handleExportClick(exportToPDF)}
+                          className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:bg-gray-100"
+                        >
+                          <FileDown className="w-4 h-4 mr-3 text-red-500" />
+                          <span className="font-medium">Export as PDF</span>
+                        </button>
+                        <button
+                          onClick={() => handleExportClick(exportToCSV)}
+                          className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:bg-gray-100"
+                        >
+                          <Table className="w-4 h-4 mr-3 text-green-500" />
+                          <span className="font-medium">Export as CSV</span>
+                        </button>
+                      </div>
+                      
+                      {/* Close button for mobile */}
+                      <div className="border-t border-gray-200 sm:hidden">
+                        <button
+                          onClick={() => setExportDropdownOpen(false)}
+                          className="flex items-center justify-center w-full px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Close
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  
+                  {/* Backdrop for mobile - closes dropdown when tapped */}
+                  {exportDropdownOpen && (
+                    <div 
+                      className="fixed inset-0 z-40 sm:hidden"
+                      onClick={() => setExportDropdownOpen(false)}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -670,162 +714,165 @@ const Reports = () => {
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
               <div className="flex items-center">
-                <XCircle className="w-5 h-5 mr-2" />
-                {error}
+                <XCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                <span className="text-sm sm:text-base">{error}</span>
               </div>
             </div>
           )}
 
-          {/* Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          {/* Overview Cards - Responsive Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-blue-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Appraisals</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalAppraisals}</p>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">Total Appraisals</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalAppraisals}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-amber-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Pending Review</p>
-                  <p className="text-2xl font-bold text-amber-600">{stats.pendingHOD}</p>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">Pending Review</p>
+                  <p className="text-xl sm:text-2xl font-bold text-amber-600">{stats.pendingHOD}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Approved</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">Approved</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.approved}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-purple-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Faculty Count</p>
-                  <p className="text-2xl font-bold text-purple-600">{faculty.length}</p>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">Faculty Count</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-600">{faculty.length}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Charts Row - Responsive Layout */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
             
-            {/* Status Distribution Chart */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Appraisal Status Distribution</h3>
-                <div className="text-sm text-gray-500">
+            {/* Status Distribution Chart - Responsive */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Appraisal Status Distribution</h3>
+                <div className="text-xs sm:text-sm text-gray-500">
                   Total: {stats.totalAppraisals} submissions
                 </div>
               </div>
               
               {stats.totalAppraisals > 0 ? (
-                <div className="h-80">
+                <div className="h-64 sm:h-80">
                   <Doughnut data={statusChartData} options={statusChartOptions} />
                 </div>
               ) : (
-                <div className="h-80 flex items-center justify-center">
+                <div className="h-64 sm:h-80 flex items-center justify-center">
                   <div className="text-center">
-                    <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">No appraisal data available</p>
+                    <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 text-sm sm:text-base">No appraisal data available</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Submission Trends Chart */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="block sm:flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Submission Trends - {
+            {/* Submission Trends Chart - Responsive */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                  <span className="hidden sm:inline">Submission Trends - {
                     selectedTimeframe === 'week' ? 'By Day of Week' :
                     selectedTimeframe === 'month' ? 'Last 30 Days' :
                     'Last 12 Months'
-                  }
+                  }</span>
+                  <span className="sm:hidden">Submission Trends</span>
                 </h3>
                 <div className="flex items-center space-x-2">
-  <Filter className="w-4 h-4 text-gray-400"/>
-  <select
-    value={selectedTimeframe}
-    onChange={(e) => setSelectedTimeframe(e.target.value)}
-    className="text-sm sm:text-sm xs:text-xs border border-gray-300 rounded-lg px-3 py-1 sm:px-3 sm:py-1 xs:px-2 xs:py-0.5 focus:outline-none focus:ring-2 focus:ring-green-500"
-  >
-    <option value="week">This Week</option>
-    <option value="month">Last 30 Days</option>
-    <option value="year">Last 12 Months</option>
-  </select>
-</div>
-
+                  <Filter className="w-4 h-4 text-gray-400" />
+                  <select
+                    value={selectedTimeframe}
+                    onChange={(e) => setSelectedTimeframe(e.target.value)}
+                    className="text-xs sm:text-sm border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                  >
+                    <option value="week">This Week</option>
+                    <option value="month">Last 30 Days</option>
+                    <option value="year">Last 12 Months</option>
+                  </select>
+                </div>
               </div>
               
-              <div className="h-80">
+              <div className="h-64 sm:h-80">
                 <Bar data={trendsChartData} options={trendsChartOptions} />
               </div>
               
               {submissionTrends.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-xl">
                   <div className="text-center">
-                    <BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">No submission data for selected timeframe</p>
+                    <BarChart3 className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 text-sm sm:text-base">No submission data for selected timeframe</p>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Pending Appraisals Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="block sm:flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Pending Appraisals - Action Required</h3>
-              <div className="text-sm text-gray-500">
+          {/* Pending Appraisals Table - Responsive */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                <span className="hidden sm:inline">Pending Appraisals - Action Required</span>
+                <span className="sm:hidden">Pending Appraisals</span>
+              </h3>
+              <div className="text-xs sm:text-sm text-gray-500">
                 {pendingAppraisals.length} pending reviews
               </div>
             </div>
 
             {pendingAppraisals.length === 0 ? (
-              <div className="text-center py-12">
-                <CheckCircle className="w-12 h-12 text-green-300 mx-auto mb-4" />
-                <h4 className="text-lg font-medium text-gray-900 mb-2">All caught up!</h4>
-                <p className="text-gray-500">No pending appraisals require your review</p>
+              <div className="text-center py-8 sm:py-12">
+                <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-300 mx-auto mb-4" />
+                <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-2">All caught up!</h4>
+                <p className="text-gray-500 text-sm sm:text-base">No pending appraisals require your review</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Faculty
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                         Submission Date
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Days Pending
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Priority
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Action
                       </th>
                     </tr>
@@ -833,36 +880,40 @@ const Reports = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {pendingAppraisals.map((appraisal) => (
                       <tr key={appraisal._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                              <span className="text-green-600 font-medium text-sm">
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center">
+                              <span className="text-green-600 font-medium text-xs sm:text-sm">
                                 {appraisal.fullName?.charAt(0).toUpperCase()}
                               </span>
                             </div>
-                            <div className="ml-3">
-                              <div className="text-sm font-medium text-gray-900">
+                            <div className="ml-2 sm:ml-3">
+                              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
                                 {appraisal.fullName}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-xs text-gray-500 hidden sm:block">
                                 {appraisal.employeeCode}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                           <div className="flex items-center text-sm text-gray-600">
                             <Calendar className="w-4 h-4 mr-2" />
                             {new Date(appraisal.submissionDate).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="text-xs sm:text-sm font-medium text-gray-900">
                             {appraisal.daysSinceSubmission} {appraisal.daysSinceSubmission === 1 ? 'day' : 'days'}
                           </div>
+                          {/* Show submission date on mobile under days */}
+                          <div className="text-xs text-gray-500 sm:hidden">
+                            {new Date(appraisal.submissionDate).toLocaleDateString()}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(appraisal.daysSinceSubmission)}`}>
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(appraisal.daysSinceSubmission)}`}>
                             {getPriorityIcon(appraisal.daysSinceSubmission)}
                             <span className="ml-1">
                               {appraisal.daysSinceSubmission >= 7 ? 'High' : 
@@ -870,14 +921,17 @@ const Reports = () => {
                             </span>
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Button
-                            onClick={() => window.open(`/hod/appraisal/${appraisal._id}`, '_blank')}
-                            size="small"
-                            className="bg-green-600 hover:bg-green-700"
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <Link
+                            to={`/hod/appraisal/${appraisal._id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
-                            Review
-                          </Button>
+                            <Button size="small" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
+                              <span className="hidden sm:inline">Review</span>
+                              <span className="sm:hidden">View</span>
+                            </Button>
+                          </Link>
                         </td>
                       </tr>
                     ))}
@@ -893,4 +947,3 @@ const Reports = () => {
 };
 
 export default Reports;
-                 

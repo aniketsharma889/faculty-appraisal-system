@@ -23,6 +23,7 @@ import AdminProfile from "./pages/admin/Profile";
 import AdminEditProfile from "./pages/admin/EditProfile";
 import ViewAppraisalDetails from "./pages/faculty/ViewAppraisalDetails";
 import HODReports from "./pages/hod/Reports";
+import FacultyAppraisals from "./pages/hod/FacultyAppraisals";
 
 function App() {
   return (
@@ -36,22 +37,24 @@ function App() {
         <Route path="/faculty/edit-appraisal/:id" element={<EditAppraisal />} />
         <Route path="/faculty/profile" element={<FacultyProfile />} />
         <Route path="/faculty/edit-profile/:id" element={<EditProfile />} />
+        {/* HOD Routes */}
         <Route path="/hod/dashboard" element={<HODDashboard />} />
         <Route path="/hod/view-appraisals" element={<HODViewAppraisals />} />
         <Route path="/hod/appraisal/:id" element={<HODReviewAppraisal />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/hod/manage-faculty" element={<ManageFaculty />} />
+        <Route path="/hod/faculty/:facultyId/appraisals" element={<FacultyAppraisals />} />
+        <Route path="/hod/reports" element={<HODReports />} />
+        <Route path="/hod/profile" element={<HODProfile />} />
+        <Route path="/hod/edit-profile/:id" element={<HODEditProfile />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/view-appraisals" element={<AdminViewAppraisals />} />
         <Route path="/admin/appraisal/:id" element={<AdminReviewAppraisal />} />
         <Route path="/admin/manage-users" element={<ManageUsers />} />
         <Route path="/admin/user/:id" element={<ViewUser />} />
         <Route path="/admin/departments" element={<Departments />} />
         <Route path="/admin/edit-user/:id" element={<EditUser />} />
-        <Route path="/hod/profile" element={<HODProfile />} />
-        <Route path="/hod/edit-profile/:id" element={<HODEditProfile />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin/edit-profile/:id" element={<AdminEditProfile />} />
-        <Route path="/hod/reports" element={<HODReports />} />
       </Routes>
     </BrowserRouter>
   );

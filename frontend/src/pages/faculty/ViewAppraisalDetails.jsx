@@ -153,11 +153,13 @@ const ViewAppraisalDetails = () => {
   if (loading) {
     return (
       <DashboardLayout allowedRole="faculty">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading appraisal details...</p>
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p className="text-gray-600 text-sm sm:text-base">Loading appraisal details...</p>
+              </div>
             </div>
           </div>
         </div>
@@ -168,17 +170,19 @@ const ViewAppraisalDetails = () => {
   if (error || !appraisal) {
     return (
       <DashboardLayout allowedRole="faculty">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <XCircle className="w-8 h-8 text-red-600" />
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <XCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
+              </div>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Error Loading Appraisal</h3>
+              <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">{error}</p>
+              <Button onClick={() => navigate("/faculty/view-appraisals")} className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Appraisals
+              </Button>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Appraisal</h3>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <Button onClick={() => navigate("/faculty/view-appraisals")} className="bg-indigo-600 hover:bg-indigo-700">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Appraisals
-            </Button>
           </div>
         </div>
       </DashboardLayout>
@@ -191,8 +195,8 @@ const ViewAppraisalDetails = () => {
   return (
     <DashboardLayout allowedRole="faculty">
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-          {/* Header */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-8">
+          {/* Header - Responsive */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center">
@@ -202,32 +206,35 @@ const ViewAppraisalDetails = () => {
                   className="w-fit sm:mr-4"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
+                  <span className="hidden sm:inline">Back</span>
+                  <span className="sm:hidden">Back</span>
                 </Button>
-                <div>
+                <div className="text-center sm:text-left">
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Appraisal Details</h1>
                   <p className="text-sm sm:text-base text-gray-600 mt-1">View your submitted appraisal information</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
-                <span className={`inline-flex items-center px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border ${statusConfig.color}`}>
+              <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-3">
+                <span className={`inline-flex items-center px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border ${statusConfig.color} self-start sm:self-auto`}>
                   <StatusIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   {statusConfig.label}
                 </span>
                 <Button
                   onClick={downloadPDF}
                   disabled={downloadingPDF}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                 >
                   {downloadingPDF ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Generating...
+                      <span className="hidden sm:inline">Generating...</span>
+                      <span className="sm:hidden">Loading...</span>
                     </>
                   ) : (
                     <>
                       <Download className="w-4 h-4 mr-2" />
-                      Download PDF
+                      <span className="hidden sm:inline">Download PDF</span>
+                      <span className="sm:hidden">PDF</span>
                     </>
                   )}
                 </Button>
@@ -235,8 +242,8 @@ const ViewAppraisalDetails = () => {
             </div>
           </div>
 
-          {/* Personal Information */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
+          {/* Personal Information - Responsive Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
             <InfoCard icon={User} title="Personal Information" className="xl:col-span-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 <DataField label="Full Name" value={appraisal.fullName} icon={User} />
