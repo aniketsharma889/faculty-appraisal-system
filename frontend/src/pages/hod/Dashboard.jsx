@@ -8,13 +8,12 @@ import {
   Clock, 
   Building2, 
   CheckCircle, 
-  XCircle,
+  Settings,
   AlertCircle,
   TrendingUp,
   Eye,
   Calendar,
   Award,
-  Filter,
   Search
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
@@ -138,7 +137,7 @@ const HODDashboard = () => {
 
   const getProgressPercentage = () => {
     if (stats.totalAppraisals === 0) return 0;
-    return Math.round(((stats.approved + stats.rejected) / stats.totalAppraisals) * 100);
+    return Math.round(((stats.approved) / stats.totalAppraisals) * 100);
   };
 
   const filteredAppraisals = recentAppraisals.filter(appraisal => {
@@ -320,15 +319,28 @@ const HODDashboard = () => {
                       </div>
                     </div>
                   </Link>
-                  <Link to="/hod/profile" className="block">
+                  <Link to="/hod/reports" className="block">
                   <div className="group bg-white border-2 border-slate-200 hover:border-green-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md cursor-pointer">
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-slate-100 group-hover:bg-green-100 rounded-lg flex items-center justify-center mr-4 transition-colors">
                         <BarChart3 className="w-5 h-5 text-slate-600 group-hover:text-green-600" />
                       </div>
                       <div>
+                        <div className="font-semibold text-slate-800">Reports</div>
+                        <div className="text-slate-500 text-sm">View Department Reports</div>
+                      </div>
+                    </div>
+                  </div>
+                  </Link>
+                  <Link to="/hod/profile" className="block">
+                  <div className="group bg-white border-2 border-slate-200 hover:border-green-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md cursor-pointer">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-slate-100 group-hover:bg-green-100 rounded-lg flex items-center justify-center mr-4 transition-colors">
+                        <Settings className="w-5 h-5 text-slate-600 group-hover:text-green-600" />
+                      </div>
+                      <div>
                         <div className="font-semibold text-slate-800">Profile</div>
-                        <div className="text-slate-500 text-sm">View-Profile</div>
+                        <div className="text-slate-500 text-sm">View Profile</div>
                       </div>
                     </div>
                   </div>
@@ -340,9 +352,9 @@ const HODDashboard = () => {
             {/* Recent Activity */}
             <div className="xl:col-span-2">
               <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 h-full">
-                <div className="flex items-center justify-between mb-6">
+                <div className="block sm:flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-slate-800">Recent Submissions</h3>
-                  <div className="flex items-center space-x-4">
+                  <div className="block sm:flex items-center space-x-4">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                       <input

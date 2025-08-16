@@ -21,6 +21,8 @@ import HODProfile from "./pages/hod/Profile";
 import HODEditProfile from "./pages/hod/EditProfile";
 import AdminProfile from "./pages/admin/Profile";
 import AdminEditProfile from "./pages/admin/EditProfile";
+import ViewAppraisalDetails from "./pages/faculty/ViewAppraisalDetails";
+import HODReports from "./pages/hod/Reports";
 
 function App() {
   return (
@@ -30,6 +32,7 @@ function App() {
         <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
         <Route path="/faculty/submit-appraisal" element={<SubmitAppraisal />} />
         <Route path="/faculty/view-appraisals" element={<ViewAppraisals />} />
+        <Route path="/faculty/appraisal/:id" element={<ViewAppraisalDetails />} />
         <Route path="/faculty/edit-appraisal/:id" element={<EditAppraisal />} />
         <Route path="/faculty/profile" element={<FacultyProfile />} />
         <Route path="/faculty/edit-profile/:id" element={<EditProfile />} />
@@ -48,6 +51,7 @@ function App() {
         <Route path="/hod/edit-profile/:id" element={<HODEditProfile />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin/edit-profile/:id" element={<AdminEditProfile />} />
+        <Route path="/hod/reports" element={<HODReports />} />
       </Routes>
     </BrowserRouter>
   );

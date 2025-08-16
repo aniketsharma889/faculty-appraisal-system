@@ -87,6 +87,10 @@ export const submitAppraisal = async (appraisalData) => {
     });
     return response.data;
   } catch (error) {
+    // Provide more specific error messages for validation errors
+    if (error.response?.status === 400 && error.response?.data?.message) {
+      throw { message: error.response.data.message };
+    }
     throw error.response?.data || { message: 'Appraisal submission failed' };
   }
 };
@@ -146,6 +150,10 @@ export const updateAppraisal = async (id, appraisalData) => {
     });
     return response.data;
   } catch (error) {
+    // Provide more specific error messages for validation errors
+    if (error.response?.status === 400 && error.response?.data?.message) {
+      throw { message: error.response.data.message };
+    }
     throw error.response?.data || { message: 'Failed to update appraisal' };
   }
 };
@@ -202,6 +210,16 @@ export const getDepartmentFaculty = async () => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Failed to fetch department faculty' };
+  }
+};
+
+// NEW: HOD reports function
+export const getHODReportsData = async () => {
+  try {
+    const response = await api.get('/hod/reports');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch reports data');
   }
 };
 

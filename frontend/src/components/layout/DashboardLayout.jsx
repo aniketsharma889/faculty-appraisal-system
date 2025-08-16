@@ -37,9 +37,9 @@ const DashboardLayout = ({ children, allowedRole }) => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 transition-colors duration-300">
       <Navigation user={user} />
-      <main className="py-6">
+      <main className="py-2 sm:py-4 lg:py-6">
         {children}
       </main>
     </div>

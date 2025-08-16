@@ -19,6 +19,67 @@ const AppraisalSchema = Yup.object().shape({
   dateOfJoining: Yup.date().required("Date of joining is required"),
   dateOfBirth: Yup.date().required("Date of birth is required"),
   address: Yup.string().required("Address is required"),
+  
+  // Professional Information - First entries required
+  academicQualifications: Yup.array().of(
+    Yup.object().shape({
+      degree: Yup.string().required("Degree is required"),
+      institution: Yup.string().required("Institution is required"),
+      yearOfPassing: Yup.string().required("Year of passing is required")
+    })
+  ).min(1, "At least one academic qualification is required"),
+  
+  researchPublications: Yup.array().of(
+    Yup.object().shape({
+      title: Yup.string().required("Publication title is required")
+    })
+  ).min(1, "At least one research publication entry is required"),
+  
+  seminars: Yup.array().of(
+    Yup.object().shape({
+      title: Yup.string().required("Seminar title is required")
+    })
+  ).min(1, "At least one seminar entry is required"),
+  
+  projects: Yup.array().of(
+    Yup.object().shape({
+      title: Yup.string().required("Project title is required")
+    })
+  ).min(1, "At least one project entry is required"),
+  
+  lectures: Yup.array().of(
+    Yup.object().shape({
+      topic: Yup.string().required("Lecture topic is required")
+    })
+  ).min(1, "At least one lecture entry is required"),
+  
+  awardsRecognitions: Yup.array().of(
+    Yup.object().shape({
+      title: Yup.string().required("Award title is required")
+    })
+  ).min(1, "At least one award entry is required"),
+  
+  professionalMemberships: Yup.array().of(
+    Yup.string().required("Professional membership is required")
+  ).min(1, "At least one professional membership is required"),
+  
+  coursesTaught: Yup.array().of(
+    Yup.object().shape({
+      courseName: Yup.string().required("Course name is required")
+    })
+  ).min(1, "At least one course entry is required"),
+  
+  administrativeResponsibilities: Yup.array().of(
+    Yup.object().shape({
+      role: Yup.string().required("Administrative role is required")
+    })
+  ).min(1, "At least one administrative responsibility entry is required"),
+  
+  studentMentoring: Yup.array().of(
+    Yup.object().shape({
+      studentName: Yup.string().required("Student name is required")
+    })
+  ).min(1, "At least one student mentoring entry is required")
 });
 
 const AppraisalForm = () => {
@@ -26,6 +87,7 @@ const AppraisalForm = () => {
   const [apiError, setApiError] = useState("");
   const [currentSection, setCurrentSection] = useState(0);
   const [initialValues, setInitialValues] = useState(null);
+  const [sectionErrors, setSectionErrors] = useState({});
   const navigate = useNavigate();
 
   const sections = [
@@ -73,6 +135,53 @@ const AppraisalForm = () => {
     setIsLoading(true);
     setApiError("");
 
+    // Additional frontend validation to prevent empty submissions
+    const validateRequiredArrays = (arrayData, fieldName, requiredFields = []) => {
+      if (!Array.isArray(arrayData) || arrayData.length === 0) {
+        return `At least one ${fieldName} entry is required`;
+      }
+      
+      const firstEntry = arrayData[0];
+      for (const field of requiredFields) {
+        if (!firstEntry[field] || firstEntry[field].toString().trim() === '') {
+          return `${fieldName}: ${field} is required in the first entry`;
+        }
+      }
+      return null;
+    };
+
+    // Validate professional information arrays
+    const arrayValidations = [
+      { data: values.academicQualifications, name: 'academic qualifications', required: ['degree', 'institution', 'yearOfPassing'] },
+      { data: values.researchPublications, name: 'research publications', required: ['title'] },
+      { data: values.seminars, name: 'seminars', required: ['title'] },
+      { data: values.projects, name: 'projects', required: ['title'] },
+      { data: values.lectures, name: 'lectures', required: ['topic'] },
+      { data: values.awardsRecognitions, name: 'awards and recognitions', required: ['title'] },
+      { data: values.coursesTaught, name: 'courses taught', required: ['courseName'] },
+      { data: values.administrativeResponsibilities, name: 'administrative responsibilities', required: ['role'] },
+      { data: values.studentMentoring, name: 'student mentoring', required: ['studentName'] }
+    ];
+
+    for (const validation of arrayValidations) {
+      const error = validateRequiredArrays(validation.data, validation.name, validation.required);
+      if (error) {
+        setApiError(error);
+        setIsLoading(false);
+        setSubmitting(false);
+        return;
+      }
+    }
+
+    // Validate professional memberships (array of strings)
+    if (!Array.isArray(values.professionalMemberships) || values.professionalMemberships.length === 0 || 
+        !values.professionalMemberships[0] || values.professionalMemberships[0].trim() === '') {
+      setApiError('At least one professional membership is required');
+      setIsLoading(false);
+      setSubmitting(false);
+      return;
+    }
+
     try {
       await submitAppraisal(values);
       navigate("/faculty/dashboard", { 
@@ -86,13 +195,116 @@ const AppraisalForm = () => {
     }
   };
 
-  const nextSection = () => {
+  // Section validation functions
+  const validatePersonalInformation = (values) => {
+    const errors = {};
+    const requiredFields = {
+      fullName: 'Full name',
+      employeeCode: 'Employee code',
+      email: 'Email',
+      phoneNumber: 'Phone number',
+      department: 'Department',
+      designation: 'Designation',
+      dateOfJoining: 'Date of joining',
+      dateOfBirth: 'Date of birth',
+      address: 'Address'
+    };
+
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!values[field] || values[field].toString().trim() === '') {
+        errors[field] = `${label} is required`;
+      }
+    }
+
+    // Email format validation
+    if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      errors.email = 'Please provide a valid email address';
+    }
+
+    return errors;
+  };
+
+  const validateProfessionalInformation = (values) => {
+    const errors = {};
+
+    // Validate arrays with required first entries
+    const arrayValidations = [
+      { field: 'academicQualifications', name: 'Academic Qualifications', required: ['degree', 'institution', 'yearOfPassing'] },
+      { field: 'researchPublications', name: 'Research Publications', required: ['title'] },
+      { field: 'seminars', name: 'Seminars', required: ['title'] },
+      { field: 'projects', name: 'Projects', required: ['title'] },
+      { field: 'lectures', name: 'Lectures', required: ['topic'] },
+      { field: 'awardsRecognitions', name: 'Awards & Recognition', required: ['title'] },
+      { field: 'coursesTaught', name: 'Courses Taught', required: ['courseName'] },
+      { field: 'administrativeResponsibilities', name: 'Administrative Responsibilities', required: ['role'] },
+      { field: 'studentMentoring', name: 'Student Mentoring', required: ['studentName'] }
+    ];
+
+    for (const validation of arrayValidations) {
+      const data = values[validation.field];
+      if (!Array.isArray(data) || data.length === 0) {
+        errors[validation.field] = `At least one ${validation.name} entry is required`;
+        continue;
+      }
+
+      const firstEntry = data[0];
+      for (const requiredField of validation.required) {
+        if (!firstEntry[requiredField] || firstEntry[requiredField].toString().trim() === '') {
+          errors[validation.field] = `${validation.name}: ${requiredField} is required in the first entry`;
+          break;
+        }
+      }
+    }
+
+    // Validate professional memberships (array of strings)
+    if (!Array.isArray(values.professionalMemberships) || values.professionalMemberships.length === 0 || 
+        !values.professionalMemberships[0] || values.professionalMemberships[0].trim() === '') {
+      errors.professionalMemberships = 'At least one professional membership is required';
+    }
+
+    return errors;
+  };
+
+  const validateCurrentSection = (values) => {
+    let errors = {};
+    
+    switch (currentSection) {
+      case 0: // Personal Information
+        errors = validatePersonalInformation(values);
+        break;
+      case 1: // Professional Information
+        errors = validateProfessionalInformation(values);
+        break;
+      case 2: // File Upload (optional section)
+        // No required validation for file upload
+        break;
+      default:
+        break;
+    }
+
+    setSectionErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const nextSection = (formikProps) => {
+    const isValid = validateCurrentSection(formikProps.values);
+    
+    if (!isValid) {
+      setApiError('Please fill all required fields before proceeding to the next section.');
+      return;
+    }
+
+    setApiError(''); // Clear any previous errors
+    
     if (currentSection < sections.length - 1) {
       setCurrentSection(currentSection + 1);
     }
   };
 
   const prevSection = () => {
+    setApiError(''); // Clear errors when going back
+    setSectionErrors({});
+    
     if (currentSection > 0) {
       setCurrentSection(currentSection - 1);
     }
@@ -155,7 +367,22 @@ const AppraisalForm = () => {
           >
             {(formikProps) => (
               <Form onSubmit={(e) => e.preventDefault()}>
-                <CurrentSectionComponent formikProps={formikProps} />
+                <CurrentSectionComponent 
+                  formikProps={formikProps} 
+                  sectionErrors={sectionErrors}
+                />
+
+                {/* Show section-specific errors */}
+                {Object.keys(sectionErrors).length > 0 && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-3 rounded mb-4 sm:mb-6 text-sm sm:text-base">
+                    <p className="font-semibold mb-2">Please fix the following errors:</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      {Object.values(sectionErrors).map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Navigation Buttons */}
                 <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 space-y-4 sm:space-y-0">
@@ -173,7 +400,7 @@ const AppraisalForm = () => {
                     {currentSection < sections.length - 1 ? (
                       <Button 
                         type="button" 
-                        onClick={nextSection}
+                        onClick={() => nextSection(formikProps)}
                         className="w-full sm:w-auto"
                       >
                         Next

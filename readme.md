@@ -28,8 +28,9 @@ Built with modern web technologies, this application features a React.js fronten
   - Courses taught and administrative responsibilities
   - Student mentoring activities
 - **File Upload Support** for supporting documents
-- **Form validation**
+- **Form validation** with section-by-section progress
 - **Edit/Update** submitted appraisals (when allowed)
+- **Advanced PDF Download** with embedded document previews and image integration
 
 ### 👥 **HOD Dashboard & Management**
 - **Department-specific Appraisal Review** (HODs see only their department)
@@ -51,10 +52,13 @@ Built with modern web technologies, this application features a React.js fronten
 
 ### 🔧 **Technical Features**
 - **Responsive Design** for all device types
-- **File Management** with secure upload
+- **Advanced File Management** with secure upload via Cloudinary
+- **Intelligent PDF Generation** with embedded document previews, image integration, and PDF file previews
+- **Smart Document Categorization** separating images, PDFs, and other file types in generated reports
 - **Data Validation** and error handling
 - **Search and Filter** capabilities
 - **Toast Notifications** for user feedback
+- **Enhanced PDF Reports** with visual file previews and organized document sections
 
 ---
 
@@ -79,13 +83,13 @@ Built with modern web technologies, this application features a React.js fronten
 - **[bcrypt](https://github.com/kelektiv/node.bcrypt.js/)** — Password hashing for secure credential storage
 - **[CORS](https://github.com/expressjs/cors)** — Cross-Origin Resource Sharing middleware
 - **[dotenv](https://github.com/motdotla/dotenv)** — Environment variable management
+- **[Cloudinary](https://cloudinary.com/)** — Cloud-based file upload and management
+- **[Puppeteer](https://pptr.dev/)** — Advanced PDF generation with embedded document previews and image integration
 
 ### Development Tools
 - **[Nodemon](https://github.com/remy/nodemon)** — Development server with automatic restart
 - **[Jest](https://jestjs.io/)** — JavaScript testing framework
 - **[Supertest](https://github.com/ladjs/supertest)** — HTTP assertion library for testing
-
----
 
 ---
 
@@ -165,6 +169,7 @@ Frontend application will start on **http://localhost:5173**
 - `GET /api/appraisal-form/my-appraisals` - Get faculty's appraisals
 - `GET /api/appraisal-form/appraisal/:id` - Get specific appraisal
 - `PUT /api/appraisal-form/update-appraisal/:id` - Update appraisal
+- `GET /api/appraisal-form/download-pdf/:id` - Download appraisal as enhanced PDF with document previews
 
 ### HOD Routes
 - `GET /api/hod/appraisals` - Get department appraisals
@@ -189,8 +194,9 @@ Frontend application will start on **http://localhost:5173**
 
 ### Faculty
 - Submit and edit personal appraisal forms
-- Upload supporting documents
+- Upload supporting documents (images, PDFs, certificates)
 - View submission status and feedback
+- Download comprehensive PDF reports with embedded document previews
 - Update profile information
 
 ### HOD (Head of Department)
