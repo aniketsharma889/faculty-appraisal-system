@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
-import InputField from "../ui/ImputField";
+import InputField from "../ui/InputField";
 import { loginUser } from "../../utils/api";
 
 const LoginSchema = Yup.object().shape({

@@ -1,5 +1,5 @@
 import { Field, ErrorMessage } from "formik";
-import InputField from "../../ui/ImputField";
+import InputField from "../../ui/InputField";
 import { User, Mail, Building2, Calendar, IdCard, Phone, Award } from "lucide-react";
 
 const departments = [
