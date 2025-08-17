@@ -139,29 +139,31 @@ const EditUser = () => {
 
   return (
     <DashboardLayout allowedRole="admin">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        <div className="bg-white rounded-2xl shadow-xl p-0 overflow-hidden">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8">
-            <div className="mb-4 sm:mb-0">
-              <Button 
-                onClick={() => navigate(`/admin/user/${id}`)} 
-                variant="outline"
-                className="mb-4 border-red-200 text-red-600 hover:bg-red-50"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to User Details
-              </Button>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 flex items-center">
-                <User className="w-8 h-8 mr-3 text-red-500" />
-                Edit User
-              </h1>
-              <p className="text-gray-600 mt-2">Update user information and manage roles</p>
+          <div className="bg-gradient-to-r from-red-600 via-red-700 to-orange-600 px-4 sm:px-6 py-6 sm:py-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+              <div>
+                <Button 
+                  onClick={() => navigate(`/admin/user/${id}`)} 
+                  variant="outline"
+                  className="mb-4 border-red-200 text-red-600 hover:bg-red-50"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to User Details
+                </Button>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white flex items-center">
+                  <User className="w-8 h-8 mr-3 text-red-200" />
+                  Edit User
+                </h1>
+                <p className="text-red-100 mt-2 text-sm sm:text-base">Update user information and manage roles</p>
+              </div>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 mx-4 mt-4">
               {error}
             </div>
           )}
@@ -184,74 +186,70 @@ const EditUser = () => {
                 
                 return (
                   <Form className="space-y-6">
-                    {/* User Profile Header */}
-                    <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-2xl p-6 mb-8">
-                      <div className="flex items-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-xl font-bold mr-4">
+                    {/* User Profile Card */}
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl p-6 mb-6 mx-4 mt-4 shadow-sm">
+                      <div className="flex-shrink-0">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                           {user.name?.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <h2 className="text-base sm:text-xl font-bold text-gray-800">
-                            Editing: {user.name}
-                          </h2>
-                          <div className="flex items-center mt-1">
-                            {getRoleIcon(user.role)}
-                            <span className="ml-2 text-gray-600 capitalize">
-                              Current Role: {user.role}
-                            </span>
-                          </div>
+                      </div>
+                      <div className="sm:ml-6 mt-4 sm:mt-0 text-center sm:text-left">
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                          Editing: {user.name}
+                        </h2>
+                        <div className="flex items-center justify-center sm:justify-start mt-2 gap-2">
+                          {getRoleIcon(user.role)}
+                          <span className="px-3 py-1 rounded-full text-xs font-medium border bg-red-100 text-red-800 border-red-300 shadow-sm capitalize">
+                            {user.role}
+                          </span>
                         </div>
+                        <p className="text-xs text-gray-500 mt-2">{user.email}</p>
                       </div>
                     </div>
 
                     {/* Role Change Warning */}
                     {roleChange && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-                        <div className="flex items-start">
-                          <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" />
-                          <div>
-                            <h4 className="font-semibold text-amber-800">
-                              Role Change Detected
-                            </h4>
-                            <p className="text-amber-700 text-sm mt-1">
-                              You are {roleChange.type === 'promotion' ? 'promoting' : 'demoting'} this user from {user.role} to {values.role}.
-                            </p>
-                          </div>
-                          <roleChange.icon className={`w-5 h-5 ml-auto ${roleChange.color}`} />
+                      <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-4 mx-4 mb-6 flex flex-col sm:flex-row items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5 text-amber-500" />
+                          <span className="font-semibold text-amber-800">Role Change Detected</span>
                         </div>
+                        <div className="flex-1 text-amber-700 text-sm mt-2 sm:mt-0">
+                          You are {roleChange.type === 'promotion' ? 'promoting' : 'demoting'} this user from <b>{user.role}</b> to <b>{values.role}</b>.
+                        </div>
+                        <roleChange.icon className={`w-5 h-5 ${roleChange.color}`} />
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                      {/* Basic Information */}
-                      <div className="space-y-1">
+                    {/* Form Fields */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-4">
+                      <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Full Name *
                         </label>
                         <Field
                           name="name"
                           type="text"
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                           placeholder="Enter full name"
                         />
-                        <ErrorMessage name="name" component="div" className="text-red-500 text-xs sm:text-sm mt-1" />
+                        <ErrorMessage name="name" component="div" className="text-red-500 text-xs mt-1" />
                       </div>
 
-                      <div className="space-y-1">
+                      <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Email Address *
                         </label>
                         <Field
                           name="email"
                           type="email"
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                           placeholder="Enter email address"
                         />
-                        <ErrorMessage name="email" component="div" className="text-red-500 text-xs sm:text-sm mt-1" />
+                        <ErrorMessage name="email" component="div" className="text-red-500 text-xs mt-1" />
                       </div>
 
-                      {/* Enhanced Role Selection */}
-                      <div className="space-y-1">
+                      <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Role *
                         </label>
@@ -260,46 +258,35 @@ const EditUser = () => {
                             <div className="relative">
                               <select
                                 {...field}
-                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-gray-300 
-               rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 
-               focus:border-red-500 transition-all duration-200 text-sm sm:text-base 
-               appearance-none cursor-pointer hover:border-red-400 hover:bg-red-50"
-                                onChange={(e) => {
-                                  setFieldValue('role', e.target.value);
-                                }}
+                                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 appearance-none cursor-pointer"
+                                onChange={(e) => setFieldValue('role', e.target.value)}
                               >
-                                <option value="faculty" className="py-2">
-                                  👨‍🏫 Faculty Member
-                                </option>
-                                <option value="hod" className="py-2">
-                                  👑 Head of Department (HOD)
-                                </option>
+                                <option value="faculty">👨‍🏫 Faculty Member</option>
+                                <option value="hod">👑 Head of Department (HOD)</option>
                               </select>
                               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                                <ChevronDown className="w-4 h-4 text-gray-400" />
                               </div>
                             </div>
                           )}
                         </Field>
-                        <ErrorMessage name="role" component="div" className="text-red-500 text-xs sm:text-sm mt-1" />
+                        <ErrorMessage name="role" component="div" className="text-red-500 text-xs mt-1" />
                       </div>
 
-                      {/* Employee Code */}
-                      <div className="space-y-1">
+                      <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Employee Code *
                         </label>
                         <Field
                           name="employeeCode"
                           type="text"
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                           placeholder="Enter employee code"
                         />
-                        <ErrorMessage name="employeeCode" component="div" className="text-red-500 text-xs sm:text-sm mt-1" />
+                        <ErrorMessage name="employeeCode" component="div" className="text-red-500 text-xs mt-1" />
                       </div>
 
-                      {/* Enhanced Department Selection */}
-                      <div className="space-y-1 lg:col-span-2">
+                      <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Department *
                         </label>
@@ -308,67 +295,36 @@ const EditUser = () => {
                             <div className="relative">
                               <select
                                 {...field}
-                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-gray-300 
-               rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 
-               focus:border-red-500 transition-all duration-200 text-sm sm:text-base 
-               appearance-none cursor-pointer hover:border-red-400 hover:bg-red-50"
+                                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 appearance-none cursor-pointer"
                               >
-                                <option value="" className="text-gray-500 py-2">
-                                  🏢 Select Department
-                                </option>
+                                <option value="">🏢 Select Department</option>
                                 <optgroup label="🔬 Engineering & Technology">
-                                  <option value="Computer Science" className="py-2">
-                                    💻 Computer Science
-                                  </option>
-                                  <option value="Electronics & Communication" className="py-2">
-                                    📡 Electronics & Communication
-                                  </option>
-                                  <option value="Mechanical Engineering" className="py-2">
-                                    ⚙️ Mechanical Engineering
-                                  </option>
-                                  <option value="Civil Engineering" className="py-2">
-                                    🏗️ Civil Engineering
-                                  </option>
-                                  <option value="Electrical Engineering" className="py-2">
-                                    ⚡ Electrical Engineering
-                                  </option>
-                                  <option value="Information Technology" className="py-2">
-                                    🌐 Information Technology
-                                  </option>
-                                  <option value="Chemical Engineering" className="py-2">
-                                    🧪 Chemical Engineering
-                                  </option>
-                                  <option value="Biotechnology" className="py-2">
-                                    🧬 Biotechnology
-                                  </option>
+                                  <option value="Computer Science">💻 Computer Science</option>
+                                  <option value="Electronics & Communication">📡 Electronics & Communication</option>
+                                  <option value="Mechanical Engineering">⚙️ Mechanical Engineering</option>
+                                  <option value="Civil Engineering">🏗️ Civil Engineering</option>
+                                  <option value="Electrical Engineering">⚡ Electrical Engineering</option>
+                                  <option value="Information Technology">🌐 Information Technology</option>
+                                  <option value="Chemical Engineering">🧪 Chemical Engineering</option>
+                                  <option value="Biotechnology">🧬 Biotechnology</option>
                                 </optgroup>
                                 <optgroup label="📚 Sciences & Liberal Arts">
-                                  <option value="Mathematics" className="py-2">
-                                    🔢 Mathematics
-                                  </option>
-                                  <option value="Physics" className="py-2">
-                                    ⚛️ Physics
-                                  </option>
-                                  <option value="Chemistry" className="py-2">
-                                    🧪 Chemistry
-                                  </option>
-                                  <option value="English" className="py-2">
-                                    📖 English
-                                  </option>
+                                  <option value="Mathematics">🔢 Mathematics</option>
+                                  <option value="Physics">⚛️ Physics</option>
+                                  <option value="Chemistry">🧪 Chemistry</option>
+                                  <option value="English">📖 English</option>
                                 </optgroup>
                                 <optgroup label="💼 Management & Business">
-                                  <option value="Management Studies" className="py-2">
-                                    📊 Management Studies
-                                  </option>
+                                  <option value="Management Studies">📊 Management Studies</option>
                                 </optgroup>
                               </select>
                               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                                <ChevronDown className="w-4 h-4 text-gray-400" />
                               </div>
                             </div>
                           )}
                         </Field>
-                        <ErrorMessage name="department" component="div" className="text-red-500 text-xs sm:text-sm mt-1" />
+                        <ErrorMessage name="department" component="div" className="text-red-500 text-xs mt-1" />
                         <p className="text-xs text-gray-500 mt-1">
                           Select the department where this user will be assigned
                         </p>
@@ -376,27 +332,25 @@ const EditUser = () => {
                     </div>
 
                     {/* Role Information Card */}
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 sm:p-6">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          {getRoleIcon(values.role)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-blue-900 text-sm sm:text-base mb-2">
-                            {values.role === 'hod' ? 'Head of Department' : 'Faculty Member'} Information
-                          </h4>
-                          <p className="text-blue-800 text-xs sm:text-sm leading-relaxed">
-                            {values.role === 'hod' 
-                              ? 'HODs have departmental administrative privileges and can review faculty appraisals within their department.'
-                              : 'Faculty members can submit and manage their own performance appraisals.'
-                            }
-                          </p>
-                        </div>
+                    <div className="mx-4 mt-6 mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 sm:p-6 flex items-center gap-4">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        {getRoleIcon(values.role)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-blue-900 text-sm sm:text-base mb-2">
+                          {values.role === 'hod' ? 'Head of Department' : 'Faculty Member'} Information
+                        </h4>
+                        <p className="text-blue-800 text-xs sm:text-sm leading-relaxed">
+                          {values.role === 'hod' 
+                            ? 'HODs have departmental administrative privileges and can review faculty appraisals within their department.'
+                            : 'Faculty members can submit and manage their own performance appraisals.'
+                          }
+                        </p>
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
+                    {/* Actions - sticky on mobile */}
+                    <div className="sticky bottom-0 bg-white z-10 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200 mx-4 pb-4">
                       <Button
                         type="button"
                         onClick={() => navigate(`/admin/user/${id}`)}

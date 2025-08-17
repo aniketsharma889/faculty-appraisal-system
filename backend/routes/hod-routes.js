@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getHODAppraisals, getHODAppraisalById, reviewAppraisal } = require('../controllers/appraisalForm');
+const { getHODAppraisals, getHODAppraisalById, reviewAppraisal } = require('../controllers/appraisalController');
 const { auth, hodOnly } = require('../middlewares/authMiddleware');
 const { getDepartmentFaculty, getDashboardStats, getReportsData } = require('../controllers/hodController');
 const { getProfile, updateProfile } = require('../controllers/userController');

@@ -17,8 +17,15 @@ Built with modern web technologies, this application features a React.js fronten
 - **Role-based Access Control** (Faculty, HOD, Admin)
 - **Protected Routes** and middleware-based authorization
 
+### 📱 **Responsive Design**
+
+- **Fully responsive UI** with mobile-first design
+- **Optimized layouts** for desktop, tablet, and mobile
+- **Built using TailwindCSS** for consistent styling
+
 ### 📝 **Faculty Appraisal Management**
-- **Comprehensive Appraisal Forms** with multiple sections:
+
+- **Comprehensive Appraisal** Forms with multiple sections:
   - Personal and professional information
   - Academic qualifications and research publications
   - Seminars, workshops, and conferences attended
@@ -30,49 +37,189 @@ Built with modern web technologies, this application features a React.js fronten
 - **File Upload Support** for supporting documents
 - **Form validation** with section-by-section progress
 - **Edit/Update** submitted appraisals (when allowed)
-- **Advanced PDF Download** with embedded document previews and image integration
+- **Client-side PDF Generation** with comprehensive details, and document links
+- **Search & Filter** Faculty Appraisals for quick access
+- **Status Tracking** (e.g., Pending, Reviewed by HOD, Approved by Admin)
 
-### 👥 **HOD Dashboard & Management**
+### 👥 HOD Dashboard & Management
+
 - **Department-specific Appraisal Review** (HODs see only their department)
-- **Approval/Rejection Workflow** with comments
+- **Approval/Rejection** Workflow with comments & feedback
 - **Faculty Management** and department overview
-- **Review Comments** and feedback system
-
+- **Search & Filter Appraisals** by:
+  - Faculty name, email, joining year/date, employee code, activity status
+  - Appraisal completion level (how much detail filled in forms)
+  - Appraisal status: Approved, Rejected, Pending HOD Review, Pending Admin Review
+  - Faculty state: Active, Inactive, Pending Review, Completed Review
+- **Sorting by Completion** Level (faculty with more details filled shown first)
+- **Statistics & Insights**:
+  - Total faculty in department
+  - Active faculty (submitted ≥1 appraisal)
+  - Activity rate (submission & review stats)
+  - Pending reviews count
+- **Faculty Profile View** → access all appraisals of a particular faculty
+- **Reports & Visual Analytics**:
+  - Pie/Donut chart: Appraisal Status Distribution (Approved, Rejected, Pending HOD/Admin Review)
+  - Bar chart: Submission Trends (with week/month/year filters)
+  - Export Options: Download reports in PDF or Excel format.
 ### 🛡️ **Admin Panel**
-- **System-wide Appraisal Management** (view all departments)
-- **Final Approval Authority** for appraisals
-- **User Management**
-- **Department Management** 
-- **User Promotion** and role changes
 
+- **System-wide Appraisal Management** across all departments
+- **Final Approval Authority** for appraisals
+- **Comprehensive** User & Department Management
+- **Role Management** with promotion/demotion (Faculty ⇄ HOD)
+- **Advanced Reporting & Analytics** with export options
+- **Appraisal Management**: View and filter appraisals by status (Approved, Rejected, Pending HOD, Pending Admin), sort by completion level, filter by department or joining year.
+- **User Management**: Search and filter by name, email, role, department, joining date. Restricted view (Admins can’t see other admins’ details). Edit basic info (name, email, employee code, department), and manage roles (promote/demote).
+- **Department Management**: View department details with counts of users, faculty, and HODs. Filter departments (most users, most faculty, most HODs). Drill down to view users by department.
+- **Reports & Analytics**:
+  - User Roles Distribution (Pie/Donut Chart)
+  - Appraisal Status Overview (Column Chart)
+  - Top Departments by Users (Horizontal Bar Chart)
+  - Top Departments by Appraisals (Horizontal Bar Chart)
+  - Appraisals Submitted Over Time (Line Chart) with weekly/monthly/yearly filters
+  - Department-wise Appraisals (Grouped Bar Chart) – Approved, Rejected, Pending
+- **Export Options**: Reports and details exportable to PDF or Excel
+
+---
 ### 📊 **Dashboard**
 - **Role-specific Dashboards** with relevant metrics
 - **Submission Tracking** and status monitoring
 - **Recent Activity** feeds of appraisals
+- **Analytics Widgets** for quick insights (totals, pending tasks, progress rates)
+- **Responsive Design** for seamless use across devices
 
 ### 🔧 **Technical Features**
 - **Responsive Design** for all device types
 - **Advanced File Management** with secure upload via Cloudinary
-- **Intelligent PDF Generation** with embedded document previews, image integration, and PDF file previews
-- **Smart Document Categorization** separating images, PDFs, and other file types in generated reports
+- **Client-side PDF Generation** using html2pdf.js for faculty appraisals and HOD reports
+- **Smart Document Integration** with file type recognition and direct download links
 - **Data Validation** and error handling
 - **Search and Filter** capabilities
 - **Toast Notifications** for user feedback
-- **Enhanced PDF Reports** with visual file previews and organized document sections
+- **Enhanced PDF Reports** with organized document sections
+- **Protected API Endpoints** with middleware validation
+- **Reusable UI Components** for consistency and maintainability
+- **Optimized Performance**
 
 ---
 
+```
+## 🏗 Project Structure
+├── backend
+    ├── .gitignore
+    ├── config
+    │   ├── cloudinaryConfig.js
+    │   ├── db.js
+    │   └── multer.js
+    ├── controllers
+    │   ├── adminController.js
+    │   ├── appraisalController.js
+    │   ├── hodController.js
+    │   └── userController.js
+    ├── middlewares
+    │   └── authMiddleware.js
+    ├── models
+    │   ├── appraisal-form-model.js
+    │   └── user-model.js
+    ├── node_modules
+    ├── package-lock.json
+    ├── package.json
+    ├── .env
+    ├── routes
+    │   ├── admin-routes.js
+    │   ├── appraisal-form-routes.js
+    │   ├── hod-routes.js
+    │   └── user-routes.js
+    └── server.js
+├── frontend
+    ├── node_modules
+    ├── .gitignore
+    ├── eslint.config.js
+    ├── index.html
+    ├── package-lock.json
+    ├── package.json
+    ├── .env
+    ├── src
+    │   ├── App.css
+    │   ├── App.jsx
+    │   ├── index.css
+    │   ├── main.jsx
+    │   ├── components
+    │   │   ├── auth
+    │   │   │   ├── AdminAuth.jsx
+    │   │   │   ├── FacultyAuth.jsx
+    │   │   │   └── HODAuth.jsx
+    │   │   ├── dashboard
+    │   │   │   └── DashboardStats.jsx
+    │   │   ├── forms
+    │   │   │   ├── AdminLogin.jsx
+    │   │   │   ├── AppraisalForm.jsx
+    │   │   │   ├── EditAppraisalForm.jsx
+    │   │   │   ├── FacultyLogin.jsx
+    │   │   │   ├── HODLogin.jsx
+    │   │   │   ├── RoleBasedLogin.jsx
+    │   │   │   └── sections
+    │   │   │   │   ├── FileUploadSection.jsx
+    │   │   │   │   ├── PersonalInformationSection.jsx
+    │   │   │   │   └── ProfessionalInformationSection.jsx
+    │   │   ├── layout
+    │   │   │   ├── AuthLayout.jsx
+    │   │   │   ├── DashboardLayout.jsx
+    │   │   │   └── Navigation.jsx
+    │   │   └── ui
+    │   │   │   ├── Button.jsx
+    │   │   │   └── InputField.jsx
+    │   ├── pages
+    │   │   ├── admin
+    │   │   │   ├── Dashboard.jsx
+    │   │   │   ├── Departments.jsx
+    │   │   │   ├── EditProfile.jsx
+    │   │   │   ├── Profile.jsx
+    │   │   │   ├── ViewAppraisals.jsx
+    │   │   │   ├── ReviewAppraisal.jsx
+    │   │   │   ├── ManageUsers.jsx
+    │   │   │   ├── ViewUser.jsx
+    │   │   │   ├── EditUser.jsx
+    │   │   │   └── AdminAnalyticsDashboard.jsx
+    │   │   └── hod
+    │   │   │   ├── Dashboard.jsx
+    │   │   │   ├── EditProfile.jsx
+    │   │   │   ├── ManageFaculty.jsx
+    │   │   │   ├── FacultyAppraisals.jsx
+    │   │   │   ├── Profile.jsx
+    │   │   │   ├── ReviewAppraisal.jsx
+    │   │   │   ├── ViewAppraisals.jsx
+    │   │   │   └── Reports.jsx
+    │   │   └── faculty
+    │   │   │   ├── Dashboard.jsx
+    │   │   │   ├── EditAppraisal.jsx
+    │   │   │   ├── EditProfile.jsx
+    │   │   │   ├── Profile.jsx
+    │   │   │   ├── SubmitAppraisal.jsx
+    │   │   │   ├── ViewAppraisalDetails.jsx
+    │   │   │   └── ViewAppraisals.jsx
+    │   └── utils
+    │   │   ├── api.js
+    │   │   └── toast.js
+    └── vite.config.js
+└── readme.md
+```
 ## 🛠️ Technology Stack
 
 ### Frontend Technologies
-- **[React.js](https://reactjs.org/)** — Modern JavaScript library for building user interfaces
-- **[Vite](https://vitejs.dev/)** — Next-generation frontend build tool with lightning-fast HMR
-- **[React Router DOM](https://reactrouter.com/)** — Declarative routing for React applications
-- **[Tailwind CSS](https://tailwindcss.com/)** — Utility-first CSS framework for rapid UI development
-- **[Axios](https://axios-http.com/)** — Promise-based HTTP client for API requests
-- **[Lucide React](https://lucide.dev/)** — Beautiful & customizable SVG icons for React
-- **[Formik](https://formik.org/)** — Build forms in React without tears
-- **[Yup](https://github.com/jquense/yup)** — JavaScript schema validation library
+- **[React.js](https://reactjs.org/)** — Modern JavaScript library for building user interfaces  
+- **[Vite](https://vitejs.dev/)** — Next-generation frontend build tool with lightning-fast HMR  
+- **[React Router DOM](https://reactrouter.com/)** — Declarative routing for React applications  
+- **[Tailwind CSS](https://tailwindcss.com/)** — Utility-first CSS framework for rapid UI development  
+- **[Axios](https://axios-http.com/)** — Promise-based HTTP client for API requests  
+- **[Lucide React](https://lucide.dev/)** — Beautiful & customizable SVG icons for React  
+- **[Formik](https://formik.org/)** — Build forms in React without tears  
+- **[Yup](https://github.com/jquense/yup)** — JavaScript schema validation library  
+- **[html2pdf.js](https://github.com/eKoopmans/html2pdf.js)** — Client-side PDF generation from HTML  
+- **[Chart.js](https://www.chartjs.org/)** — Flexible and interactive charting library  
+- **[react-chartjs-2](https://react-chartjs-2.js.org/)** — React wrapper for Chart.js for easy integration in React apps  
+- **[dotenv](https://github.com/motdotla/dotenv)** — Environment variable management
 
 ### Backend Technologies
 - **[Node.js](https://nodejs.org/)** — JavaScript runtime environment for server-side applications
@@ -84,7 +231,7 @@ Built with modern web technologies, this application features a React.js fronten
 - **[CORS](https://github.com/expressjs/cors)** — Cross-Origin Resource Sharing middleware
 - **[dotenv](https://github.com/motdotla/dotenv)** — Environment variable management
 - **[Cloudinary](https://cloudinary.com/)** — Cloud-based file upload and management
-- **[Puppeteer](https://pptr.dev/)** — Advanced PDF generation with embedded document previews and image integration
+- **[Multer](https://github.com/expressjs/multer)** — Middleware for handling multipart/form-data, primarily for file uploads
 
 ### Development Tools
 - **[Nodemon](https://github.com/remy/nodemon)** — Development server with automatic restart
@@ -99,7 +246,7 @@ Built with modern web technologies, this application features a React.js fronten
 - **Node.js** (v16 or higher) - [Download here](https://nodejs.org/)
 - **MongoDB** (Local installation or MongoDB Atlas) - [Setup guide](https://www.mongodb.com/docs/manual/installation/)
 - **Git** - [Download here](https://git-scm.com/)
-
+- **Cloudinary Account** - [Sign Up](https://cloudinary.com/)
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/aniketsharma889/faculty-appraisal-system.git
@@ -126,8 +273,16 @@ MONGODB_URI=mongodb://localhost:27017faculty-appraisal
 # For MongoDB Atlas:
  mongodb+srv://username:password@cluster.mongodb.net/faculty-appraisal-system?retryWrites=true&w=majority
 JWT_SECRET=your_super_secure_jwt_secret_key_here
+CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME
+CLOUDINARY_API_KEY=YOUR_API_KEY
+CLOUDINARY_API_SECRET=YOUR_API_SECRET
 ```
+Create a `.env` file in the frontend directory:
 
+```
+VITE_API_BASE_URL= 'http://localhost:5000/api'
+
+```
 ### 4. Start Backend Server
 ```bash
 # Development mode (with auto-restart)
@@ -169,7 +324,7 @@ Frontend application will start on **http://localhost:5173**
 - `GET /api/appraisal-form/my-appraisals` - Get faculty's appraisals
 - `GET /api/appraisal-form/appraisal/:id` - Get specific appraisal
 - `PUT /api/appraisal-form/update-appraisal/:id` - Update appraisal
-- `GET /api/appraisal-form/download-pdf/:id` - Download appraisal as enhanced PDF with document previews
+- PDF generation handled client-side using html2pdf.js
 
 ### HOD Routes
 - `GET /api/hod/appraisals` - Get department appraisals
@@ -177,6 +332,7 @@ Frontend application will start on **http://localhost:5173**
 - `POST /api/hod/review` - Submit HOD review
 - `GET /api/hod/dashboard-stats` - Get dashboard statistics
 - `GET /api/hod/department-faculty` - Get department faculty list
+- `GET /api/hod/reports` - Get hod reports.
 
 ### Admin Routes
 - `GET /api/admin/appraisals` - Get all appraisals
@@ -196,20 +352,22 @@ Frontend application will start on **http://localhost:5173**
 - Submit and edit personal appraisal forms
 - Upload supporting documents (images, PDFs, certificates)
 - View submission status and feedback
-- Download comprehensive PDF reports with embedded document previews
+- Download comprehensive PDF reports with client-side generation
 - Update profile information
 
 ### HOD (Head of Department)
 - Review appraisals from department faculty
 - Approve/reject appraisals with comments
 - Manage department faculty information
+- Generate department analytics reports with PDF and excel export
 
 ### Admin
 - System-wide appraisal management
 - Final approval authority
 - User management and role assignments
 - Department configuration
-
+- Promote or Demote Faculty and HOD
+- Genrate analytics reports with pdf and excel export
 ---
 
 ## 🧪 Testing
@@ -243,7 +401,9 @@ Frontend application will start on **http://localhost:5173**
 - **[Formik Documentation](https://formik.org/docs/overview)**
 - **[Yup Validation Documentation](https://github.com/jquense/yup#readme)**
 - **[Lucide Icons](https://lucide.dev/icons/)**
-
+- **[html2pdf.js Documentation](https://github.com/eKoopmans/html2pdf.js)**
+- **[Chart.js](https://www.chartjs.org/docs/latest/)**
+- **[react-chartjs-2](https://react-chartjs-2.js.org/)**
 ### Development Tools
 - **[Nodemon Documentation](https://github.com/remy/nodemon#nodemon)**
 - **[Jest Testing Framework](https://jestjs.io/docs/getting-started)**

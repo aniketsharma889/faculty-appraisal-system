@@ -5,6 +5,7 @@ import {
   Users, Briefcase, FileText, Star, Building, MapPin, Clock, Download,
   CheckCircle, XCircle, AlertCircle, Loader2
 } from "lucide-react";
+import html2pdf from 'html2pdf.js';
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import Button from "../../components/ui/Button";
 import { getAppraisalById } from "../../utils/api";
@@ -36,32 +37,304 @@ const ViewAppraisalDetails = () => {
   const downloadPDF = async () => {
     try {
       setDownloadingPDF(true);
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/appraisal-form/download-pdf/${id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to download PDF');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${appraisal.fullName}_Appraisal_${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
       
+      // Show loading state
+      const loadingToast = document.createElement('div');
+      loadingToast.textContent = 'Generating PDF...';
+      loadingToast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4f46e5;color:white;padding:12px 20px;border-radius:8px;z-index:1000;font-family:Arial,sans-serif;';
+      document.body.appendChild(loadingToast);
+
+      // Helper functions for PDF generation
+      const isImageFile = (fileName) => {
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
+        const extension = fileName.split('.').pop().toLowerCase();
+        return imageExtensions.includes(extension);
+      };
+
+      const isPDFFile = (fileName) => {
+        const extension = fileName.split('.').pop().toLowerCase();
+        return extension === 'pdf';
+      };
+
+      const getFileTypeIcon = (fileName) => {
+        const extension = fileName.split('.').pop().toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(extension)) {
+          return '🖼️';
+        } else if (extension === 'pdf') {
+          return '📄';
+        } else if (['doc', 'docx'].includes(extension)) {
+          return '📝';
+        } else if (['zip', 'rar', '7z'].includes(extension)) {
+          return '📦';
+        } else {
+          return '📎';
+        }
+      };
+
+      const reportDate = new Date().toLocaleDateString();
+      const reportTime = new Date().toLocaleTimeString();
+      
+      // Create HTML content for PDF
+      const element = document.createElement('div');
+      element.innerHTML = `
+        <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; line-height: 1.5;">
+          <!-- Header with Faculty Profile -->
+          <div style="text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; margin-bottom: 15px;">
+              ${appraisal.fullName?.charAt(0).toUpperCase()}
+            </div>
+            <h1 style="color: #1e40af; margin: 0; font-size: 28px;">Faculty Appraisal Report</h1>
+            <p style="margin: 5px 0; font-weight: bold; font-size: 18px;">${appraisal.fullName}</p>
+            <p style="margin: 5px 0; color: #666;">${appraisal.department} • ${appraisal.designation}</p>
+            <p style="margin: 5px 0; color: #666;">Employee Code: ${appraisal.employeeCode}</p>
+            <div style="margin: 10px 0;">
+              <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; ${
+                appraisal.status === 'approved' ? 'background: #dcfce7; color: #166534;' : 
+                appraisal.status === 'rejected' ? 'background: #fef2f2; color: #dc2626;' :
+                appraisal.status === 'pending_admin' ? 'background: #dbeafe; color: #1d4ed8;' :
+                'background: #fef3c7; color: #d97706;'
+              }">
+                ${statusConfig.label}
+              </span>
+            </div>
+            <p style="margin: 10px 0; color: #666;">Generated on: ${reportDate} at ${reportTime}</p>
+          </div>
+
+          <!-- Personal Information -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">Personal Information</h2>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                <div style="font-weight: bold; color: #374151; margin-bottom: 5px;">📧 Contact Information</div>
+                <div style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+                  <div>📧 ${appraisal.email}</div>
+                  ${hasValue(appraisal.phoneNumber) ? `<div>📞 ${appraisal.phoneNumber}</div>` : ''}
+                  ${hasValue(appraisal.address) ? `<div>📍 ${appraisal.address}</div>` : ''}
+                </div>
+              </div>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                <div style="font-weight: bold; color: #374151; margin-bottom: 5px;">📅 Important Dates</div>
+                <div style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+                  ${hasValue(appraisal.dateOfJoining) ? `<div>Joined: ${new Date(appraisal.dateOfJoining).toLocaleDateString()}</div>` : ''}
+                  ${hasValue(appraisal.dateOfBirth) ? `<div>Born: ${new Date(appraisal.dateOfBirth).toLocaleDateString()}</div>` : ''}
+                  <div>Submitted: ${new Date(appraisal.submissionDate).toLocaleDateString()}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          ${hasValue(appraisal.academicQualifications) ? `
+          <!-- Academic Qualifications -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">🎓 Academic Qualifications</h2>
+            ${appraisal.academicQualifications.filter(q => hasValue(q.degree)).map(qual => `
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">${qual.degree}</div>
+                ${hasValue(qual.institution) ? `<div style="color: #6b7280; font-size: 14px;">🏛️ ${qual.institution}</div>` : ''}
+                ${hasValue(qual.yearOfPassing) ? `<div style="color: #6b7280; font-size: 14px;">📅 ${qual.yearOfPassing}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.researchPublications) ? `
+          <!-- Research Publications -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">📚 Research Publications</h2>
+            ${appraisal.researchPublications.filter(p => hasValue(p.title)).map(pub => `
+              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">${pub.title}</div>
+                ${hasValue(pub.journal) ? `<div style="color: #059669; font-size: 14px;">📖 ${pub.journal}</div>` : ''}
+                ${hasValue(pub.year) ? `<div style="color: #059669; font-size: 14px;">📅 ${pub.year}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.projects) ? `
+          <!-- Research Projects -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">🔬 Research Projects</h2>
+            ${appraisal.projects.filter(p => hasValue(p.title)).map(project => `
+              <div style="background: #faf5ff; border: 1px solid #d8b4fe; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">${project.title}</div>
+                ${hasValue(project.description) ? `<div style="color: #7c3aed; font-size: 14px; margin-bottom: 5px;">${project.description}</div>` : ''}
+                ${hasValue(project.year) ? `<div style="color: #7c3aed; font-size: 14px;">📅 ${project.year}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.awardsRecognitions) ? `
+          <!-- Awards & Recognition -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">🏆 Awards & Recognition</h2>
+            ${appraisal.awardsRecognitions.filter(a => hasValue(a.title)).map(award => `
+              <div style="background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">🏆 ${award.title}</div>
+                ${hasValue(award.organization) ? `<div style="color: #d97706; font-size: 14px;">🏛️ ${award.organization}</div>` : ''}
+                ${hasValue(award.year) ? `<div style="color: #d97706; font-size: 14px;">📅 ${award.year}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.seminars) ? `
+          <!-- Seminars & Workshops -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">👥 Seminars & Workshops</h2>
+            ${appraisal.seminars.filter(s => hasValue(s.title)).map(seminar => `
+              <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">${seminar.title}</div>
+                ${hasValue(seminar.venue) ? `<div style="color: #0891b2; font-size: 14px;">📍 ${seminar.venue}</div>` : ''}
+                ${hasValue(seminar.date) ? `<div style="color: #0891b2; font-size: 14px;">📅 ${new Date(seminar.date).toLocaleDateString()}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.lectures) ? `
+          <!-- Guest Lectures -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">🎤 Guest Lectures</h2>
+            ${appraisal.lectures.filter(l => hasValue(l.topic)).map(lecture => `
+              <div style="background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">${lecture.topic}</div>
+                ${hasValue(lecture.date) ? `<div style="color: #be185d; font-size: 14px;">📅 ${new Date(lecture.date).toLocaleDateString()}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.professionalMemberships) ? `
+          <!-- Professional Memberships -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">⭐ Professional Memberships</h2>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+              ${appraisal.professionalMemberships.filter(m => hasValue(m)).map(membership => `
+                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; text-align: center;">
+                  <div style="font-weight: bold; color: #1f2937;">⭐ ${membership}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>` : ''}
+
+          ${hasValue(appraisal.coursesTaught) ? `
+          <!-- Courses Taught -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">📖 Courses Taught</h2>
+            ${appraisal.coursesTaught.filter(c => hasValue(c.courseName)).map(course => `
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">📖 ${course.courseName}</div>
+                ${hasValue(course.semester) ? `<div style="color: #6b7280; font-size: 14px;">Semester: ${course.semester}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.administrativeResponsibilities) ? `
+          <!-- Administrative Responsibilities -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">🏢 Administrative Responsibilities</h2>
+            ${appraisal.administrativeResponsibilities.filter(r => hasValue(r.role)).map(resp => `
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">🏢 ${resp.role}</div>
+                ${hasValue(resp.duration) ? `<div style="color: #6b7280; font-size: 14px;">Duration: ${resp.duration}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.studentMentoring) ? `
+          <!-- Student Mentoring -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">🎓 Student Mentoring</h2>
+            ${appraisal.studentMentoring.filter(m => hasValue(m.studentName)).map(mentoring => `
+              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #1f2937; margin-bottom: 5px;">👨‍🎓 ${mentoring.studentName}</div>
+                ${hasValue(mentoring.projectTitle) ? `<div style="color: #059669; font-size: 14px; margin-bottom: 5px;">Project: ${mentoring.projectTitle}</div>` : ''}
+                ${hasValue(mentoring.year) ? `<div style="color: #059669; font-size: 14px;">📅 ${mentoring.year}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          ${hasValue(appraisal.uploadedFiles) ? `
+          <!-- Supporting Documents -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">📎 Supporting Documents</h2>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+              ${appraisal.uploadedFiles.map(file => `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                  <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 20px; margin-right: 10px;">${getFileTypeIcon(file.fileName)}</span>
+                    <div style="flex: 1;">
+                      <div style="font-weight: bold; color: #1f2937; font-size: 14px; margin-bottom: 3px;">${file.fileName}</div>
+                      <div style="color: #6b7280; font-size: 12px;">Uploaded: ${new Date(file.uploadedAt).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  <div style="color: #3b82f6; font-size: 11px; word-break: break-all;">
+                    <a href="${file.fileUrl}" target="_blank" style="color: #3b82f6; text-decoration: none;">🔗 ${file.fileUrl}</a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>` : ''}
+
+          ${(hasValue(appraisal.hodApproval?.remarks) || hasValue(appraisal.adminApproval?.remarks)) ? `
+          <!-- Review Comments -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="background: #3b82f6; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">💬 Review Comments</h2>
+            ${hasValue(appraisal.hodApproval?.remarks) ? `
+              <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                <div style="font-weight: bold; color: #92400e; margin-bottom: 8px;">🏛️ HOD Review</div>
+                <div style="color: #92400e; font-size: 14px; line-height: 1.6;">${appraisal.hodApproval.remarks}</div>
+                ${appraisal.hodApproval.date ? `<div style="color: #a16207; font-size: 12px; margin-top: 8px;">Reviewed: ${new Date(appraisal.hodApproval.date).toLocaleDateString()}</div>` : ''}
+              </div>` : ''}
+            ${hasValue(appraisal.adminApproval?.remarks) ? `
+              <div style="background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px; padding: 15px;">
+                <div style="font-weight: bold; color: #1d4ed8; margin-bottom: 8px;">👨‍💼 Admin Review</div>
+                <div style="color: #1d4ed8; font-size: 14px; line-height: 1.6;">${appraisal.adminApproval.remarks}</div>
+                ${appraisal.adminApproval.date ? `<div style="color: #1e40af; font-size: 12px; margin-top: 8px;">Reviewed: ${new Date(appraisal.adminApproval.date).toLocaleDateString()}</div>` : ''}
+              </div>` : ''}
+          </div>` : ''}
+
+          <!-- Footer -->
+          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #6b7280; font-size: 12px;">
+            <p>This report was automatically generated by the Faculty Appraisal System</p>
+            <p>Generated on: ${reportDate} at ${reportTime}</p>
+            <p style="margin-top: 10px; font-style: italic;">This is a comprehensive appraisal report for ${appraisal.fullName}</p>
+          </div>
+        </div>
+      `;
+
+      // Configure PDF options
+      const opt = {
+        margin: 1,
+        filename: `${appraisal.fullName}_Appraisal_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          allowTaint: false,
+          letterRendering: true
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait' 
+        }
+      };
+
+      // Generate and save PDF
+      await html2pdf().set(opt).from(element).save();
+
+      // Remove loading toast
+      document.body.removeChild(loadingToast);
+
       showSuccessToast('PDF downloaded successfully!');
     } catch (error) {
+      console.error('Error generating PDF:', error);
+      
+      // Remove loading toast if it exists
+      const loadingToast = document.querySelector('div[style*="Generating PDF"]');
+      if (loadingToast) {
+        document.body.removeChild(loadingToast);
+      }
+      
       showErrorToast('Failed to download PDF');
-      console.error('Download error:', error);
     } finally {
       setDownloadingPDF(false);
     }

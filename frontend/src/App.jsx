@@ -24,6 +24,7 @@ import AdminEditProfile from "./pages/admin/EditProfile";
 import ViewAppraisalDetails from "./pages/faculty/ViewAppraisalDetails";
 import HODReports from "./pages/hod/Reports";
 import FacultyAppraisals from "./pages/hod/FacultyAppraisals";
+import AdminAnalyticsDashboard from "./pages/admin/AdminAnalyticsDashboard";
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
         <Route path="/admin/edit-user/:id" element={<EditUser />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin/edit-profile/:id" element={<AdminEditProfile />} />
+        <Route path="/admin/reports" element={<AdminAnalyticsDashboard />} />
       </Routes>
     </BrowserRouter>
   );

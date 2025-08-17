@@ -27,6 +27,9 @@ const ViewAppraisals = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("submissionDate");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [filterType, setFilterType] = useState("department"); // department | joiningYear | completion
+  const [filterValue, setFilterValue] = useState("all");
+  const [sortByCompletion, setSortByCompletion] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,6 +47,49 @@ const ViewAppraisals = () => {
     }
   };
 
+  // Section completion logic (same as admin)
+  const requiredSections = [
+    { key: "academicQualifications", fields: ["degree", "institution", "yearOfPassing"] },
+    { key: "researchPublications", fields: ["title"] },
+    { key: "seminars", fields: ["title"] },
+    { key: "projects", fields: ["title"] },
+    { key: "lectures", fields: ["topic"] },
+    { key: "awardsRecognitions", fields: ["title"] },
+    { key: "professionalMemberships", fields: [] },
+    { key: "coursesTaught", fields: ["courseName"] },
+    { key: "administrativeResponsibilities", fields: ["role"] },
+    { key: "studentMentoring", fields: ["studentName"] }
+  ];
+
+  function isSectionFilled(section, fields) {
+    if (!Array.isArray(section) || section.length === 0) return false;
+    if (fields.length === 0) {
+      return section.some(val => val && val.trim() !== "" && val.trim().toLowerCase() !== "none");
+    }
+    return section.some(item =>
+      fields.every(field =>
+        item[field] && item[field].toString().trim() !== "" && item[field].toString().trim().toLowerCase() !== "none"
+      )
+    );
+  }
+
+  function getCompletionScore(appraisal) {
+    let score = 0;
+    requiredSections.forEach(section => {
+      if (isSectionFilled(appraisal[section.key], section.fields)) score += 1;
+    });
+    return score;
+  }
+
+  function getJoiningYear(appraisal) {
+    if (!appraisal.dateOfJoining) return null;
+    try {
+      return new Date(appraisal.dateOfJoining).getFullYear();
+    } catch {
+      return null;
+    }
+  }
+
   // Statistics calculation
   const stats = {
     total: appraisals.length,
@@ -53,20 +99,57 @@ const ViewAppraisals = () => {
     rejected: appraisals.filter(a => a.status === 'rejected').length
   };
 
+  // Filter options
+  const joiningYears = Array.from(new Set(appraisals
+    .map(a => getJoiningYear(a))
+    .filter(Boolean)
+  )).sort((a, b) => b - a);
+
+  const completionLevels = [
+    { key: "all", label: "All Completion Levels" },
+    { key: "high", label: "Highly Completed (7+ sections)" },
+    { key: "medium", label: "Moderately Completed (4-6 sections)" },
+    { key: "low", label: "Low Completion (1-3 sections)" },
+    { key: "none", label: "No Details" }
+  ];
+
   // Filtering and sorting
-  const filteredAndSortedAppraisals = appraisals
-    .filter(appraisal => {
-      const matchesStatus = filterStatus === "all" || appraisal.status === filterStatus;
-      const matchesSearch = searchTerm === "" || 
-        appraisal.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        appraisal.employeeCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        appraisal.designation?.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesStatus && matchesSearch;
-    })
-    .sort((a, b) => {
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  let filteredBase = appraisals.filter(appraisal => {
+    let matches = true;
+    if (filterType === "department" && filterValue !== "all") {
+      matches = appraisal.department === filterValue;
+    } else if (filterType === "joiningYear" && filterValue !== "all") {
+      matches = getJoiningYear(appraisal) && getJoiningYear(appraisal).toString() === filterValue;
+    } else if (filterType === "completion" && filterValue !== "all") {
+      const score = getCompletionScore(appraisal);
+      if (filterValue === "high") matches = score >= 7;
+      else if (filterValue === "medium") matches = score >= 4 && score <= 6;
+      else if (filterValue === "low") matches = score >= 1 && score <= 3;
+      else if (filterValue === "none") matches = score === 0;
+    }
+    if (!matches) return false;
+    if (!normalizedSearch) return true;
+    return (
+      (appraisal.fullName && appraisal.fullName.toLowerCase().includes(normalizedSearch)) ||
+      (appraisal.employeeCode && appraisal.employeeCode.toLowerCase().includes(normalizedSearch)) ||
+      (appraisal.designation && appraisal.designation.toLowerCase().includes(normalizedSearch))
+    );
+  });
+
+  // Status filter
+  filteredBase = filteredBase.filter(appraisal => {
+    return filterStatus === "all" || appraisal.status === filterStatus;
+  });
+
+  // Sorting logic
+  let filteredAndSortedAppraisals = [...filteredBase];
+  if (sortByCompletion) {
+    filteredAndSortedAppraisals.sort((a, b) => getCompletionScore(b) - getCompletionScore(a));
+  } else {
+    filteredAndSortedAppraisals.sort((a, b) => {
       let aValue = a[sortBy];
       let bValue = b[sortBy];
-      
       if (sortBy === 'submissionDate') {
         aValue = new Date(aValue);
         bValue = new Date(bValue);
@@ -74,13 +157,13 @@ const ViewAppraisals = () => {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
-      
       if (sortOrder === 'asc') {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       } else {
         return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
       }
     });
+  }
 
   const getStatusConfig = (status) => {
     const configs = {
@@ -134,6 +217,9 @@ const ViewAppraisals = () => {
       </DashboardLayout>
     );
   }
+
+  // Remove duplicate empty state rendering
+  const showEmptyState = filteredAndSortedAppraisals.length === 0;
 
   return (
     <DashboardLayout allowedRole="hod">
@@ -222,7 +308,7 @@ const ViewAppraisals = () => {
             </div>
           </div>
 
-          {/* Search and Filters - Responsive */}
+          {/* Enhanced Filters/Search */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
               
@@ -240,77 +326,149 @@ const ViewAppraisals = () => {
                 />
               </div>
 
-              {/* Filters and Sort - Stack on mobile */}
+              {/* Filter Type Dropdown */}
               <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-4 lg:space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <select
+                  value={filterType}
+                  onChange={e => {
+                    setFilterType(e.target.value);
+                    setFilterValue("all");
+                  }}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto min-w-0"
+                >
+                  <option value="department">Department</option>
+                  <option value="joiningYear">Joining Year</option>
+                  <option value="completion">Appraisal Completion</option>
+                </select>
+                {/* Filter Value Dropdown */}
+                {filterType === "department" && (
                   <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    value={filterValue}
+                    onChange={e => setFilterValue(e.target.value)}
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto min-w-0"
                   >
-                    <option value="all">All Status ({stats.total})</option>
-                    <option value="pending_hod">Pending Review ({stats.pending_hod})</option>
-                    <option value="pending_admin">Sent to Admin ({stats.pending_admin})</option>
-                    <option value="approved">Approved ({stats.approved})</option>
-                    <option value="rejected">Rejected ({stats.rejected})</option>
+                    <option value="all">All Departments</option>
+                    {[...new Set(appraisals.map(a => a.department))].map(dep => (
+                      <option key={dep} value={dep}>{dep}</option>
+                    ))}
                   </select>
-                </div>
-
-                <select
-                  value={`${sortBy}-${sortOrder}`}
-                  onChange={(e) => {
-                    const [field, order] = e.target.value.split('-');
-                    setSortBy(field);
-                    setSortOrder(order);
-                  }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto"
+                )}
+                {filterType === "joiningYear" && (
+                  <select
+                    value={filterValue}
+                    onChange={e => setFilterValue(e.target.value)}
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto min-w-0"
+                  >
+                    <option value="all">All Years</option>
+                    {joiningYears.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                )}
+                {filterType === "completion" && (
+                  <select
+                    value={filterValue}
+                    onChange={e => setFilterValue(e.target.value)}
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto min-w-0"
+                  >
+                    {completionLevels.map(opt => (
+                      <option key={opt.key} value={opt.key}>{opt.label}</option>
+                    ))}
+                  </select>
+                )}
+                {/* Sort by completion toggle */}
+                <Button
+                  variant={sortByCompletion ? "primary" : "outline"}
+                  className={`border-green-200 text-green-600 hover:bg-green-50 ${sortByCompletion ? "bg-green-600 text-white" : ""}`}
+                  onClick={() => setSortByCompletion(v => !v)}
                 >
-                  <option value="submissionDate-desc">Latest First</option>
-                  <option value="submissionDate-asc">Oldest First</option>
-                  <option value="fullName-asc">Name A-Z</option>
-                  <option value="fullName-desc">Name Z-A</option>
-                  <option value="status-asc">Status A-Z</option>
-                </select>
+                  {sortByCompletion ? "Sort: Most Completed First" : "Sort by Completion"}
+                </Button>
+                {(searchTerm || filterValue !== "all" || filterType !== "department" || sortByCompletion) && (
+                  <Button
+                    variant="outline"
+                    className="border-green-200 text-green-600 hover:bg-green-50"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setFilterType("department");
+                      setFilterValue("all");
+                      setSortByCompletion(false);
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
               </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {/* Status filters - pills */}
+              {Object.keys(stats).map(key => {
+                if (key === "total") return null;
+                const statusConfig = getStatusConfig(key);
+                return (
+                  <Button
+                    key={key}
+                    variant={filterStatus === key ? "primary" : "outline"}
+                    className={`border-${statusConfig.color.split(' ')[0]} text-${statusConfig.color.split(' ')[0]}-600 hover:bg-${statusConfig.color.split(' ')[0]}-50 flex items-center space-x-2`}
+                    onClick={() => setFilterStatus(filterStatus === key ? "all" : key)}
+                  >
+                    <statusConfig.icon className="w-4 h-4" />
+                    <span className="text-sm font-medium">{statusConfig.label} ({stats[key]})</span>
+                    {filterStatus === key && (
+                      <XCircle className="w-4 h-4 text-red-500 ml-1" />
+                    )}
+                  </Button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Appraisals List - Responsive */}
-          {filteredAndSortedAppraisals.length === 0 ? (
+          {/* Error or empty state */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+              <div className="flex items-center">
+                <XCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                <span className="text-sm sm:text-base">{error}</span>
+              </div>
+            </div>
+          )}
+          {showEmptyState && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm || filterStatus !== 'all' ? 'No appraisals match your criteria' : 'No appraisals found'}
+                {searchTerm || filterValue !== "all" ? 'No appraisals match your criteria' : 'No appraisals found'}
               </h3>
               <p className="text-gray-500 mb-6 text-sm sm:text-base">
-                {searchTerm || filterStatus !== 'all' 
+                {searchTerm || filterValue !== "all" 
                   ? 'Try adjusting your search or filter criteria.'
                   : 'No faculty members in your department have submitted appraisals yet.'
                 }
               </p>
-              {searchTerm || filterStatus !== 'all' ? (
+              {(searchTerm || filterValue !== "all") && (
                 <Button 
                   onClick={() => {
                     setSearchTerm('');
-                    setFilterStatus('all');
+                    setFilterValue('all');
                   }}
                   variant="outline"
                   className="border-green-200 text-green-600 hover:bg-green-50"
                 >
                   Clear Filters
                 </Button>
-              ) : null}
+              )}
             </div>
-          ) : (
+          )}
+
+          {/* Appraisals List */}
+          {!showEmptyState && (
             <div className="space-y-4 sm:space-y-6">
               {filteredAndSortedAppraisals.map((appraisal) => {
                 const statusConfig = getStatusConfig(appraisal.status);
                 const StatusIcon = statusConfig.icon;
                 const priority = getPriorityLevel(appraisal.status, appraisal.submissionDate);
-
+                const completionScore = getCompletionScore(appraisal);
                 return (
                   <div
                     key={appraisal._id}
@@ -337,6 +495,9 @@ const ViewAppraisals = () => {
                                 {priority.level} Priority
                               </span>
                             )}
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 w-fit">
+                              Completion: {completionScore}/10
+                            </span>
                           </div>
                         </div>
 
@@ -389,7 +550,11 @@ const ViewAppraisals = () => {
             <div className="mt-6 sm:mt-8 text-center text-sm text-gray-500">
               Showing {filteredAndSortedAppraisals.length} of {appraisals.length} appraisals
               {searchTerm && ` matching "${searchTerm}"`}
-              {filterStatus !== 'all' && ` with status "${getStatusConfig(filterStatus).label}"`}
+              {filterType === "department" && filterValue !== "all" && ` in "${filterValue}"`}
+              {filterType === "joiningYear" && filterValue !== "all" && ` joined in "${filterValue}"`}
+              {filterType === "completion" && filterValue !== "all" && ` with "${completionLevels.find(l => l.key === filterValue)?.label}"`}
+              {filterStatus !== "all" && ` with status "${getStatusConfig(filterStatus).label}"`}
+              {sortByCompletion && " (sorted by completion)"}
             </div>
           )}
         </div>
@@ -399,4 +564,3 @@ const ViewAppraisals = () => {
 };
 
 export default ViewAppraisals;
-                          

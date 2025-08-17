@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { 
   BarChart3, 
@@ -58,6 +58,10 @@ const Reports = () => {
   const [pendingAppraisals, setPendingAppraisals] = useState([]);
   const [submissionTrends, setSubmissionTrends] = useState([]);
   const [selectedTimeframe, setSelectedTimeframe] = useState('week');
+
+  // Add refs for charts
+  const statusChartRef = useRef(null);
+  const trendsChartRef = useRef(null);
 
   useEffect(() => {
     fetchReportsData();
@@ -222,11 +226,47 @@ const Reports = () => {
       loadingToast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4f46e5;color:white;padding:12px 20px;border-radius:8px;z-index:1000;font-family:Arial,sans-serif;';
       document.body.appendChild(loadingToast);
 
+      // Render charts off-screen and get images
+      let statusChartImg = "";
+      let trendsChartImg = "";
+
+      // Create a temporary container for charts
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'fixed';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = '800px';
+      tempDiv.style.background = 'white';
+      document.body.appendChild(tempDiv);
+
+      // Render status chart
+      const statusCanvas = document.createElement('canvas');
+      tempDiv.appendChild(statusCanvas);
+      new ChartJS(statusCanvas, {
+        type: 'doughnut',
+        data: statusChartData,
+        options: { ...statusChartOptions, animation: false }
+      });
+      statusChartImg = statusCanvas.toDataURL('image/png');
+
+      // Render trends chart
+      const trendsCanvas = document.createElement('canvas');
+      tempDiv.appendChild(trendsCanvas);
+      new ChartJS(trendsCanvas, {
+        type: 'bar',
+        data: trendsChartData,
+        options: { ...trendsChartOptions, animation: false }
+      });
+      trendsChartImg = trendsCanvas.toDataURL('image/png');
+
+      // Remove temp charts
+      document.body.removeChild(tempDiv);
+
       // Create HTML content for PDF
       const reportDate = new Date().toLocaleDateString();
       const reportTime = new Date().toLocaleTimeString();
       
-      // Create a container element
+      // Insert chart images into PDF HTML
       const element = document.createElement('div');
       element.innerHTML = `
         <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; line-height: 1.5;">
@@ -263,6 +303,9 @@ const Reports = () => {
           <!-- Status Distribution -->
           <div style="margin-bottom: 30px;">
             <h2 style="background: #22c55e; color: white; padding: 10px 15px; margin: 0 0 20px 0; font-size: 18px;">Status Distribution</h2>
+            <div style="text-align:center;margin-bottom:20px;">
+              <img src="${statusChartImg}" alt="Status Distribution Chart" style="max-width:400px;width:100%;height:auto;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,0.06);" />
+            </div>
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
               <thead>
                 <tr style="background: #f1f5f9;">
@@ -334,6 +377,9 @@ const Reports = () => {
               selectedTimeframe === 'month' ? 'Last 30 Days' :
               'Last 12 Months'
             })</h2>
+            <div style="text-align:center;margin-bottom:20px;">
+              <img src="${trendsChartImg}" alt="Submission Trends Chart" style="max-width:600px;width:100%;height:auto;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,0.06);" />
+            </div>
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
               <thead>
                 <tr style="background: #f1f5f9;">
@@ -939,6 +985,12 @@ const Reports = () => {
                 </table>
               </div>
             )}
+          </div>
+
+          {/* Hidden charts for export (not visible, just for refs if needed) */}
+          <div style={{ display: "none" }}>
+            <Doughnut ref={statusChartRef} data={statusChartData} options={statusChartOptions} />
+            <Bar ref={trendsChartRef} data={trendsChartData} options={trendsChartOptions} />
           </div>
         </div>
       </div>
